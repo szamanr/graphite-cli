@@ -6,7 +6,7 @@ const args = {
   set: {
     demandOption: false,
     type: 'string',
-    describe: 'Set default pager for Graphite. eg --set less.',
+    describe: 'Set default pager for Graphite. e.g. --set "less -FRX".',
   },
   disable: {
     demandOption: false,

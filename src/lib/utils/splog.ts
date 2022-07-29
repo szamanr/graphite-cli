@@ -51,15 +51,24 @@ export function composeSplog(
         : () => void 0,
     page: opts.pager
       ? (s: string) => {
-          const tmpFile = tmp.fileSync();
+          const tmpFile = tmp.fileSync({ postfix: '.txt' });
           fs.writeFileSync(tmpFile.fd, s);
           const command = `${opts.pager} ${tmpFile.name}`;
           try {
             execSync(command, { stdio: 'inherit', encoding: 'utf-8' });
           } catch (e) {
+            console.log(s);
+            console.log(
+              chalk.yellow(
+                `NOTE: Tried to send output to your pager (${chalk.cyan(
+                  opts.pager
+                )}) but encountered an error.\nYou can change your configured pager or disable paging: ${chalk.cyan(
+                  `gt user pager --help`
+                )}`
+              )
+            );
             throw new CommandFailedError({
               command,
-              args: [tmpFile.name],
               ...e,
             });
           }
