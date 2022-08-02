@@ -57,6 +57,9 @@ export function composeSplog(
           input: s,
           stdio: ['pipe', 'inherit', 'inherit'],
           encoding: 'utf-8',
+          // match what git does for pager env vars
+          // https://github.com/git/git/blob/master/Documentation/config/core.txt#L550
+          env: { LESS: 'FRX', LV: '-c', ...process.env },
         });
       } catch (e) {
         console.log(s);
