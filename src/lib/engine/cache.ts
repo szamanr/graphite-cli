@@ -713,6 +713,7 @@ export function composeMetaCache({
       assertBranch(branchToSplit);
       const cachedMeta = cache.branches[branchToSplit];
       assertCachedMetaIsValidAndNotTrunk(cachedMeta);
+      const children = cachedMeta.children;
 
       // we reverse the branch points because they are referencing
       // commits from newest to oldest, but we name branches from
@@ -737,9 +738,11 @@ export function composeMetaCache({
         lastBranch.name = branchName;
         lastBranch.revision = branchRevision;
       });
-      cachedMeta.children.forEach((childBranchName) =>
-        setParent(childBranchName, lastBranch.name)
-      );
+      if (lastBranch.name !== branchToSplit) {
+        children.forEach((childBranchName) =>
+          setParent(childBranchName, lastBranch.name)
+        );
+      }
       if (!branchNames.includes(branchToSplit)) {
         deleteAllBranchData(branchToSplit);
       }

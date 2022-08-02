@@ -83,15 +83,17 @@ export async function splitCurrentBranch(
 
   const split = await actions[style](branchToSplit, context);
 
+  const children = context.metaCache.getRelativeStack(
+    branchToSplit,
+    SCOPE.UPSTACK_EXCLUSIVE
+  );
+
   context.metaCache.applySplitToCommits({
     branchToSplit,
     ...split,
   });
 
-  restackBranches(
-    context.metaCache.getRelativeStack(branchToSplit, SCOPE.UPSTACK_EXCLUSIVE),
-    context
-  );
+  restackBranches(children, context);
 }
 
 async function splitByCommit(
