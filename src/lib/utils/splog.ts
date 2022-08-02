@@ -1,8 +1,6 @@
 /* eslint-disable no-console */
 import chalk from 'chalk';
 import { execSync } from 'child_process';
-import tmp from 'tmp';
-import fs from 'fs-extra';
 import { CommandFailedError } from '../errors';
 
 export type TSplog = {
@@ -49,30 +47,33 @@ export function composeSplog(
             )
           )
         : () => void 0,
-    page: opts.pager
-      ? (s: string) => {
-          const tmpFile = tmp.fileSync({ postfix: '.txt' });
-          fs.writeFileSync(tmpFile.fd, s);
-          const command = `${opts.pager} ${tmpFile.name}`;
-          try {
-            execSync(command, { stdio: 'inherit', encoding: 'utf-8' });
-          } catch (e) {
-            console.log(s);
-            console.log(
-              chalk.yellow(
-                `NOTE: Tried to send output to your pager (${chalk.cyan(
-                  opts.pager
-                )}) but encountered an error.\nYou can change your configured pager or disable paging: ${chalk.cyan(
-                  `gt user pager --help`
-                )}`
-              )
-            );
-            throw new CommandFailedError({
-              command,
-              ...e,
-            });
-          }
-        }
-      : (s: string) => console.log(s),
+    page: (s: string) => {
+      if (!opts.pager) {
+        console.log(s);
+        return;
+      }
+      try {
+        execSync(`${opts.pager}`, {
+          input: s,
+          stdio: ['pipe', 'inherit', 'inherit'],
+          encoding: 'utf-8',
+        });
+      } catch (e) {
+        console.log(s);
+        console.log(
+          chalk.yellow(
+            `NOTE: Tried to send output to your pager (${chalk.cyan(
+              opts.pager
+            )}) but encountered an error.\nYou can change your configured pager or disable paging: ${chalk.cyan(
+              `gt user pager --help`
+            )}`
+          )
+        );
+        throw new CommandFailedError({
+          command: opts.pager,
+          ...e,
+        });
+      }
+    },
   };
 }
