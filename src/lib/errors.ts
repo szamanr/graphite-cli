@@ -1,3 +1,5 @@
+import chalk from 'chalk';
+
 class ExitError extends Error {}
 
 export class ExitFailedError extends ExitError {
@@ -49,8 +51,17 @@ export class ConcurrentExecutionError extends ExitError {
 }
 
 export class UntrackedBranchError extends ExitError {
-  constructor() {
-    super(`Cannot perform this operation on an untracked branch.`);
+  constructor(branchName: string) {
+    super(
+      [
+        `Cannot perform this operation on untracked branch ${chalk.yellow(
+          branchName
+        )}.`,
+        `You can track it by specifying its parent with ${chalk.cyan(
+          `gt branch track`
+        )}.`,
+      ].join('\n')
+    );
     this.name = 'UntrackedBranchError';
   }
 }

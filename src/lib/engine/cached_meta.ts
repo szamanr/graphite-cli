@@ -38,10 +38,11 @@ type TValidCachedMeta = Extract<
   { validationResult: 'TRUNK' | 'VALID' }
 >;
 export function assertCachedMetaIsValidOrTrunk(
+  branchName: string,
   meta: TCachedMeta
 ): asserts meta is TValidCachedMeta {
   if (meta.validationResult !== 'VALID' && meta.validationResult !== 'TRUNK') {
-    throw new UntrackedBranchError();
+    throw new UntrackedBranchError(branchName);
   }
 }
 
@@ -59,8 +60,9 @@ export type TValidCachedMetaExceptTrunk = Extract<
   TNonTrunkCachedMeta
 >;
 export function assertCachedMetaIsValidAndNotTrunk(
+  branchName: string,
   meta: TCachedMeta
 ): asserts meta is TValidCachedMetaExceptTrunk {
-  assertCachedMetaIsValidOrTrunk(meta);
+  assertCachedMetaIsValidOrTrunk(branchName, meta);
   assertCachedMetaIsNotTrunk(meta);
 }
