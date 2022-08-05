@@ -201,6 +201,13 @@ export function composeMetaCache({
     return cache.currentBranch;
   };
 
+  const assertBranchIsValidOrTrunkAndGetMeta = (branchName: string) => {
+    assertBranch(branchName);
+    const meta = cache.branches[branchName];
+    assertCachedMetaIsValidOrTrunk(branchName, meta);
+    return meta;
+  };
+
   const isDescendantOf = (branchName: string, parentBranchName: string) => {
     assertBranch(branchName);
     assertBranch(parentBranchName);
@@ -279,10 +286,7 @@ export function composeMetaCache({
       return;
     }
 
-    assertBranch(parentBranchName);
-    const parentCachedMeta = cache.branches[parentBranchName];
-    assertCachedMetaIsValidOrTrunk(parentBranchName, parentCachedMeta);
-
+    assertBranchIsValidOrTrunkAndGetMeta(parentBranchName);
     updateMeta(branchName, { ...cachedMeta, parentBranchName });
   };
 
@@ -454,11 +458,7 @@ export function composeMetaCache({
     trackBranch: (branchName: string, parentBranchName: string) => {
       validateNewParent(branchName, parentBranchName);
       assertBranch(branchName);
-      assertBranch(parentBranchName);
-      assertCachedMetaIsValidOrTrunk(
-        parentBranchName,
-        cache.branches[parentBranchName]
-      );
+      assertBranchIsValidOrTrunkAndGetMeta(parentBranchName);
 
       updateMeta(branchName, {
         ...cache.branches[branchName],
@@ -500,7 +500,7 @@ export function composeMetaCache({
     },
     get currentBranchPrecondition(): string {
       const branchName = getCurrentBranchOrThrow();
-      assertCachedMetaIsValidOrTrunk(branchName, cache.branches[branchName]);
+      assertBranchIsValidOrTrunkAndGetMeta(branchName);
       return branchName;
     },
     getRevision: (branchName: string) => {
@@ -515,9 +515,7 @@ export function composeMetaCache({
       return meta.parentBranchRevision;
     },
     getAllCommits: (branchName: string, format: TCommitFormat) => {
-      assertBranch(branchName);
-      const meta = cache.branches[branchName];
-      assertCachedMetaIsValidOrTrunk(branchName, meta);
+      const meta = assertBranchIsValidOrTrunkAndGetMeta(branchName);
 
       return getCommitRange(
         // for trunk, commit range is just one commit
@@ -562,9 +560,7 @@ export function composeMetaCache({
       return meta.parentBranchName;
     },
     getRelativeStack: (branchName: string, scope: TScopeSpec) => {
-      assertBranch(branchName);
-      const meta = cache.branches[branchName];
-      assertCachedMetaIsValidOrTrunk(branchName, meta);
+      assertBranchIsValidOrTrunkAndGetMeta(branchName);
       // Only includes trunk if branchName is trunk
       return [
         ...(scope.recursiveParents
@@ -576,8 +572,8 @@ export function composeMetaCache({
     },
     checkoutNewBranch: (branchName: string) => {
       const parentBranchName = getCurrentBranchOrThrow();
-      const parentCachedMeta = cache.branches[parentBranchName];
-      assertCachedMetaIsValidOrTrunk(parentBranchName, parentCachedMeta);
+      const parentCachedMeta =
+        assertBranchIsValidOrTrunkAndGetMeta(parentBranchName);
       validateNewParent(branchName, parentBranchName);
       switchBranch(branchName, { new: true });
       updateMeta(branchName, {
@@ -762,9 +758,7 @@ export function composeMetaCache({
       switchBranch(branchToSplit, { force: true });
     },
     restackBranch: (branchName: string) => {
-      assertBranch(branchName);
-      const cachedMeta = cache.branches[branchName];
-      assertCachedMetaIsValidOrTrunk(branchName, cachedMeta);
+      const cachedMeta = assertBranchIsValidOrTrunkAndGetMeta(branchName);
       if (isBranchFixed(branchName)) {
         return { result: 'REBASE_UNNEEDED' };
       }
@@ -882,9 +876,7 @@ export function composeMetaCache({
       }
     },
     fetchBranch: (branchName: string, parentBranchName: string) => {
-      assertBranch(parentBranchName);
-      const parentMeta = cache.branches[parentBranchName];
-      assertCachedMetaIsValidOrTrunk(parentBranchName, parentMeta);
+      const parentMeta = assertBranchIsValidOrTrunkAndGetMeta(parentBranchName);
       if (parentMeta.validationResult === 'TRUNK') {
         // If this is a trunk-child, its base is its merge base with trunk.
         fetchBranch(remote, branchName);
