@@ -20,10 +20,8 @@ export function getCommitTree(branchNames: string[]): Record<string, string[]> {
       ...(parentOfMergeBase
         ? [`^${parentOfMergeBase}`, ...branchNames]
         : [`--all`]),
+      '--',
     ],
-    options: {
-      maxBuffer: 1024 * 1024 * 1024,
-    },
     onError: 'throw',
     resource: 'getCommitTree',
   })

@@ -6,7 +6,7 @@ import { tracer } from './tracer';
 type TRunCommandParameters = {
   command: string;
   args: string[];
-  options?: Omit<SpawnSyncOptions, 'encoding'>;
+  options?: Omit<SpawnSyncOptions, 'encoding' | 'maxBuffer'>;
   onError: (() => void) | 'throw' | 'ignore';
 };
 
