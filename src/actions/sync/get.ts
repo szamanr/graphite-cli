@@ -205,10 +205,7 @@ async function handleSameParent(
 
   switch (fetchChoice) {
     case 'REBASE': {
-      const result = context.metaCache.rebaseBranchOntoFetched(
-        args.branchName,
-        args.parentBranchName
-      );
+      const result = context.metaCache.rebaseBranchOntoFetched(args.branchName);
       if (result.result === 'REBASE_CONFLICT') {
         persistContinuation(
           {
