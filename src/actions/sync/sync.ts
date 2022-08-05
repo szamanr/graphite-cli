@@ -83,7 +83,6 @@ export async function syncAction(
 
   if (
     currentBranch &&
-    context.metaCache.branchExists(currentBranch) &&
     context.metaCache.isBranchTracked(currentBranch) &&
     !branchesToRestack.includes(currentBranch)
   ) {

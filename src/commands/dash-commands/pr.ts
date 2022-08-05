@@ -35,10 +35,9 @@ export const handler = async (argv: argsT): Promise<void> =>
 
     const branchName = argv.pr ? argv.pr : context.metaCache.currentBranch;
 
-    const branchPrNumber =
-      branchName && context.metaCache.branchExists(branchName)
-        ? context.metaCache.getPrInfo(branchName)?.number
-        : undefined;
+    const branchPrNumber = branchName
+      ? context.metaCache.getPrInfo(branchName)?.number
+      : undefined;
 
     if (branchPrNumber) {
       return void open(

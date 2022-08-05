@@ -50,6 +50,20 @@ export class ConcurrentExecutionError extends ExitError {
   }
 }
 
+export class DetachedError extends ExitError {
+  constructor() {
+    super(`Cannot perform this operation without a branch checked out.`);
+    this.name = 'DetachedError';
+  }
+}
+
+export class NoBranchError extends ExitError {
+  constructor(branchName: string) {
+    super(`Could not find branch ${chalk.yellow(branchName)}.`);
+    this.name = 'NoBranchError';
+  }
+}
+
 export class UntrackedBranchError extends ExitError {
   constructor(branchName: string) {
     super(

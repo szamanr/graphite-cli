@@ -1,5 +1,9 @@
 import chalk from 'chalk';
-import { PreconditionsFailedError } from '../errors';
+import {
+  DetachedError,
+  NoBranchError,
+  PreconditionsFailedError,
+} from '../errors';
 import {
   deleteBranch,
   forceCheckoutNewBranch,
@@ -178,17 +182,23 @@ export function composeMetaCache({
     return trunkName;
   };
 
-  const branchExists = (branchName: string | undefined): branchName is string =>
-    branchName !== undefined && branchName in cache.branches;
+  const branchExists = (branchName: string): branchName is string =>
+    branchName in cache.branches;
 
-  const assertBranch: (
-    branchName: string | undefined
-  ) => asserts branchName is string = (branchName) => {
+  const assertBranch: (branchName: string) => asserts branchName is string = (
+    branchName
+  ) => {
     if (!branchExists(branchName)) {
-      throw new PreconditionsFailedError(
-        `${branchName} is unknown to Graphite.`
-      );
+      throw new NoBranchError(branchName);
     }
+  };
+
+  const getCurrentBranchOrThrow = () => {
+    if (!cache.currentBranch) {
+      throw new DetachedError();
+    }
+    assertBranch(cache.currentBranch);
+    return cache.currentBranch;
   };
 
   const isDescendantOf = (branchName: string, parentBranchName: string) => {
@@ -489,12 +499,9 @@ export function composeMetaCache({
       return cache.currentBranch;
     },
     get currentBranchPrecondition(): string {
-      assertBranch(cache.currentBranch);
-      assertCachedMetaIsValidOrTrunk(
-        cache.currentBranch,
-        cache.branches[cache.currentBranch]
-      );
-      return cache.currentBranch;
+      const branchName = getCurrentBranchOrThrow();
+      assertCachedMetaIsValidOrTrunk(branchName, cache.branches[branchName]);
+      return branchName;
     },
     getRevision: (branchName: string) => {
       assertBranch(branchName);
@@ -568,8 +575,7 @@ export function composeMetaCache({
       ];
     },
     checkoutNewBranch: (branchName: string) => {
-      const parentBranchName = cache.currentBranch;
-      assertBranch(parentBranchName);
+      const parentBranchName = getCurrentBranchOrThrow();
       const parentCachedMeta = cache.branches[parentBranchName];
       assertCachedMetaIsValidOrTrunk(parentBranchName, parentCachedMeta);
       validateNewParent(branchName, parentBranchName);
@@ -585,12 +591,12 @@ export function composeMetaCache({
     },
     checkoutBranch,
     renameCurrentBranch: (branchName: string) => {
-      assertBranch(cache.currentBranch);
-      if (branchName === cache.currentBranch) {
+      const currentBranchName = getCurrentBranchOrThrow();
+      if (branchName === currentBranchName) {
         return;
       }
-      const cachedMeta = cache.branches[cache.currentBranch];
-      assertCachedMetaIsValidAndNotTrunk(cache.currentBranch, cachedMeta);
+      const cachedMeta = cache.branches[currentBranchName];
+      assertCachedMetaIsValidAndNotTrunk(currentBranchName, cachedMeta);
 
       moveBranch(branchName);
       updateMeta(branchName, { ...cachedMeta, prInfo: {} });
@@ -599,14 +605,13 @@ export function composeMetaCache({
         setParent(childBranchName, branchName)
       );
 
-      removeChild(cachedMeta.parentBranchName, cache.currentBranch);
-      delete cache.branches[cache.currentBranch];
-      deleteMetadataRef(cache.currentBranch);
+      removeChild(cachedMeta.parentBranchName, currentBranchName);
+      delete cache.branches[currentBranchName];
+      deleteMetadataRef(currentBranchName);
       cache.currentBranch = branchName;
     },
     foldCurrentBranch: (keep: boolean) => {
-      const currentBranchName = cache.currentBranch;
-      assertBranch(currentBranchName);
+      const currentBranchName = getCurrentBranchOrThrow();
       const cachedMeta = cache.branches[currentBranchName];
       assertCachedMetaIsValidAndNotTrunk(currentBranchName, cachedMeta);
       const parentBranchName = cachedMeta.parentBranchName;
@@ -654,19 +659,19 @@ export function composeMetaCache({
       deleteAllBranchData(branchName);
     },
     commit: (opts: TCommitOpts) => {
-      assertBranch(cache.currentBranch);
-      const cachedMeta = cache.branches[cache.currentBranch];
-      assertCachedMetaIsValidAndNotTrunk(cache.currentBranch, cachedMeta);
+      const branchName = getCurrentBranchOrThrow();
+      const cachedMeta = cache.branches[branchName];
+      assertCachedMetaIsValidAndNotTrunk(branchName, cachedMeta);
       commit({ ...opts, noVerify });
-      cache.branches[cache.currentBranch] = {
+      cache.branches[branchName] = {
         ...cachedMeta,
-        branchRevision: getShaOrThrow(cache.currentBranch),
+        branchRevision: getShaOrThrow(branchName),
       };
     },
     squashCurrentBranch: (opts: Pick<TCommitOpts, 'message' | 'noEdit'>) => {
-      assertBranch(cache.currentBranch);
-      const cachedMeta = cache.branches[cache.currentBranch];
-      assertCachedMetaIsValidAndNotTrunk(cache.currentBranch, cachedMeta);
+      const branchName = getCurrentBranchOrThrow();
+      const cachedMeta = cache.branches[branchName];
+      assertCachedMetaIsValidAndNotTrunk(branchName, cachedMeta);
       softReset(
         getCommitRange(
           cachedMeta.parentBranchRevision,
@@ -682,21 +687,19 @@ export function composeMetaCache({
           softReset(cachedMeta.branchRevision);
         },
       });
-      cache.branches[cache.currentBranch] = {
+      cache.branches[branchName] = {
         ...cachedMeta,
-        branchRevision: getShaOrThrow(cache.currentBranch),
+        branchRevision: getShaOrThrow(branchName),
       };
     },
     detach() {
-      const branchName = cache.currentBranch;
-      assertBranch(branchName);
+      const branchName = getCurrentBranchOrThrow();
       const cachedMeta = cache.branches[branchName];
       assertCachedMetaIsValidAndNotTrunk(branchName, cachedMeta);
       switchBranch(cachedMeta.branchRevision, { detach: true });
     },
     detachAndResetBranchChanges() {
-      const branchName = cache.currentBranch;
-      assertBranch(branchName);
+      const branchName = getCurrentBranchOrThrow();
       const cachedMeta = cache.branches[branchName];
       assertCachedMetaIsValidAndNotTrunk(branchName, cachedMeta);
       switchBranch(cachedMeta.branchRevision, { detach: true });
@@ -812,6 +815,11 @@ export function composeMetaCache({
         return { result };
       }
       const branchName = getCurrentBranchName();
+      if (!branchName) {
+        throw new PreconditionsFailedError(
+          'Must be on a branch after a rebase.'
+        );
+      }
       assertBranch(branchName);
       const cachedMeta = cache.branches[branchName];
       assertCachedMetaIsValidAndNotTrunk(branchName, cachedMeta);
@@ -823,7 +831,7 @@ export function composeMetaCache({
     },
     isMergedIntoTrunk: (branchName: string) => {
       assertBranch(branchName);
-      assertBranch(trunkName);
+      const trunkName = assertTrunk();
       return isMerged({ branchName, trunkName });
     },
     isBranchFixed,
@@ -855,7 +863,7 @@ export function composeMetaCache({
     },
     pullTrunk: () => {
       pruneRemote(remote);
-      assertBranch(cache.currentBranch);
+      const currentBranchName = getCurrentBranchOrThrow();
       const trunkName = assertTrunk();
       const oldTrunkCachedMeta = cache.branches[trunkName];
       try {
@@ -870,7 +878,7 @@ export function composeMetaCache({
           ? 'PULL_UNNEEDED'
           : 'PULL_DONE';
       } finally {
-        switchBranch(cache.currentBranch);
+        switchBranch(currentBranchName);
       }
     },
     fetchBranch: (branchName: string, parentBranchName: string) => {

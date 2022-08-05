@@ -7,12 +7,6 @@ export async function untrackBranch(
   { branchName, force }: { branchName: string; force: boolean },
   context: TContext
 ): Promise<void> {
-  if (!context.metaCache.branchExists(branchName)) {
-    throw new ExitFailedError(
-      `Branch ${chalk.yellow(branchName)} does not exist.`
-    );
-  }
-
   if (context.metaCache.isTrunk(branchName)) {
     throw new ExitFailedError(`Can't untrack trunk!`);
   }

@@ -95,8 +95,8 @@ export async function trackStack(
   const force = args.force || !context.interactive;
   const branchName = args.branchName ?? context.metaCache.currentBranch;
 
-  if (!context.metaCache.branchExists(branchName)) {
-    throw new ExitFailedError(`No branch found.`);
+  if (!branchName) {
+    throw new ExitFailedError(`No branch checked out.`);
   }
 
   if (
@@ -152,8 +152,8 @@ export async function trackBranch(
   context: TContext
 ): Promise<void> {
   const branchName = args.branchName ?? context.metaCache.currentBranch;
-  if (!context.metaCache.branchExists(branchName)) {
-    throw new ExitFailedError(`No branch found.`);
+  if (!branchName) {
+    throw new ExitFailedError(`No branch checked out.`);
   }
 
   if (args.force || !args.parentBranchName) {
