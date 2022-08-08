@@ -130,7 +130,7 @@ export type TMetaCache = {
   isMergedIntoTrunk: (branchName: string) => boolean;
   isBranchFixed: (branchName: string) => boolean;
   isBranchEmpty: (branchName: string) => boolean;
-  baseMatchesRemoteParent: (branchName: string) => boolean;
+  branchMatchesRemote: (branchName: string) => boolean;
 
   pushBranch: (branchName: string, forcePush: boolean) => void;
   pullTrunk: () => 'PULL_DONE' | 'PULL_UNNEEDED';
@@ -815,17 +815,10 @@ export function composeMetaCache({
       const cachedMeta = assertBranchIsValidAndNotTrunkAndGetMeta(branchName);
       return isDiffEmpty(branchName, cachedMeta.parentBranchRevision);
     },
-    baseMatchesRemoteParent: (branchName: string) => {
-      const cachedMeta = assertBranchIsValidAndNotTrunkAndGetMeta(branchName);
-      const remoteParentRevision = getRemoteSha(
-        cachedMeta.parentBranchName,
-        remote
-      );
-      splog.debug(`${branchName} base matches remote?`);
-      splog.debug(cachedMeta.parentBranchRevision);
-      splog.debug(remoteParentRevision ?? '');
-
-      return cachedMeta.parentBranchRevision === remoteParentRevision;
+    branchMatchesRemote: (branchName: string) => {
+      const cachedMeta = assertBranchIsValidOrTrunkAndGetMeta(branchName);
+      const remoteParentRevision = getRemoteSha(branchName, remote);
+      return cachedMeta.branchRevision === remoteParentRevision;
     },
     pushBranch: (branchName: string, forcePush: boolean) => {
       assertBranchIsValidAndNotTrunkAndGetMeta(branchName);

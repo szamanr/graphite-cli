@@ -2,7 +2,6 @@ import chalk from 'chalk';
 import prompts from 'prompts';
 import { TContext } from '../../lib/context';
 import { TBranchPRInfo } from '../../lib/engine/metadata_ref';
-import { detectUnsubmittedChanges } from '../../lib/git/diff';
 import { getPRBody } from './pr_body';
 import { getPRDraftStatus } from './pr_draft';
 import { getPRTitle } from './pr_title';
@@ -121,10 +120,7 @@ async function getPRAction(
         : 'CREATE'
       : parentBranchName !== prInfo?.base
       ? 'RESTACK'
-      : detectUnsubmittedChanges(
-          args.branchName,
-          context.repoConfig.getRemote()
-        )
+      : !context.metaCache.branchMatchesRemote(args.branchName)
       ? 'CHANGE'
       : args.draft === true && prInfo.isDraft !== true
       ? 'DRAFT'

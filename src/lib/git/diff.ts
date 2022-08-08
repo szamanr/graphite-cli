@@ -1,24 +1,5 @@
 import { runGitCommand } from '../utils/run_command';
 
-export function detectUnsubmittedChanges(
-  branchName: string,
-  remote: string
-): boolean {
-  return (
-    runGitCommand({
-      args: [
-        `--no-pager`,
-        `log`,
-        `--oneline`,
-        `${branchName}...${remote}/${branchName}`,
-        `--`,
-      ],
-      onError: 'throw',
-      resource: 'detectUnsubmittedChanges',
-    }).length !== 0
-  );
-}
-
 export function detectStagedChanges(): boolean {
   return (
     runGitCommand({

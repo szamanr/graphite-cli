@@ -120,7 +120,7 @@ function validateBaseRevisions(branchNames: string[], context: TContext): void {
         );
       }
     } else {
-      if (!context.metaCache.baseMatchesRemoteParent(branchName)) {
+      if (!context.metaCache.branchMatchesRemote(parentBranchName)) {
         throw new ExitFailedError(
           [
             `You are trying to submit at least one branch whose base does not match its parent remotely, without including its parent.`,
