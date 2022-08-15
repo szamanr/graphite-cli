@@ -1,9 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import {
-  runGitCommand,
-  runGitCommandAndSplitLines,
-} from '../utils/run_command';
+import { runGitCommand, runGitCommandAndSplitLines } from './runner';
 
 export function getUnmergedFiles(): string[] {
   return runGitCommandAndSplitLines({

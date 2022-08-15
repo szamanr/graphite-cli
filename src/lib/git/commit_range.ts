@@ -1,7 +1,4 @@
-import {
-  runGitCommand,
-  runGitCommandAndSplitLines,
-} from '../utils/run_command';
+import { runGitCommand, runGitCommandAndSplitLines } from './runner';
 
 const FORMAT = {
   READABLE: '%h - %s',

@@ -5,7 +5,7 @@ import {
   trackedUncommittedChanges,
   unstagedChanges,
 } from './git/git_status_utils';
-import { runGitCommand } from './utils/run_command';
+import { runGitCommand } from './git/runner';
 
 export function getRepoRootPathPrecondition(): string {
   const repoRootPath = runGitCommand({

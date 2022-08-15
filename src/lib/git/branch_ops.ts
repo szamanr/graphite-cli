@@ -1,4 +1,4 @@
-import { runGitCommand } from '../utils/run_command';
+import { runGitCommand } from './runner';
 
 export function getCurrentBranchName(): string | undefined {
   const branchName = runGitCommand({

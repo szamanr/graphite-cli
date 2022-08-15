@@ -1,9 +1,6 @@
 import * as t from '@withgraphite/retype';
 import { cuteString } from '../utils/cute_string';
-import {
-  runGitCommand,
-  runGitCommandAndSplitLines,
-} from '../utils/run_command';
+import { runGitCommand, runGitCommandAndSplitLines } from '../git/runner';
 
 export const prInfoSchema = t.shape({
   number: t.optional(t.number),

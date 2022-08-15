@@ -1,6 +1,6 @@
 import * as t from '@withgraphite/retype';
 import { ExitFailedError } from '../errors';
-import { runGitCommand } from '../utils/run_command';
+import { runGitCommand } from '../git/runner';
 import { spiffy } from './spiffy';
 
 const schema = t.shape({

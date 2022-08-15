@@ -3,7 +3,7 @@ import yargs from 'yargs';
 import { graphiteWithoutRepo } from '../lib/runner';
 import { GitRepo } from '../lib/utils/git_repo';
 import { makeId } from '../lib/utils/make_id';
-import { runCommand, runGitCommand } from '../lib/utils/run_command';
+import { runCommand } from '../lib/utils/run_command';
 
 export const command = 'demo';
 export const canonical = 'demo';
@@ -90,7 +90,8 @@ export const handler = async (argv: argsT): Promise<void> => {
 
     repo.checkoutBranch('main');
 
-    runGitCommand({
+    runCommand({
+      command: 'git',
       args: [
         'remote',
         'add',
@@ -99,14 +100,13 @@ export const handler = async (argv: argsT): Promise<void> => {
       ],
       options: { cwd: tmpDir.name },
       onError: 'throw',
-      resource: null, // no tracing from demo
     });
 
-    runGitCommand({
+    runCommand({
+      command: 'git',
       args: ['push', 'origin', 'main', '-f'],
       options: { cwd: tmpDir.name },
       onError: 'throw',
-      resource: null, // no tracing from demo
     });
   });
 };

@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { runGitCommand } from '../utils/run_command';
+import { runGitCommand } from './runner';
+
 export function rebaseInProgress(options?: { cwd: string }): boolean {
   let rebaseDir = path.join(
     runGitCommand({

@@ -1,4 +1,4 @@
-import { runGitCommandAndSplitLines } from '../utils/run_command';
+import { runGitCommandAndSplitLines } from './runner';
 
 export function getBranchNamesAndRevisions(): Record<string, string> {
   const branches: Record<string, string> = {};

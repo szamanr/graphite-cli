@@ -1,5 +1,6 @@
 import { SpawnSyncOptions } from 'child_process';
-import { runGitCommand } from '../utils/run_command';
+import { runGitCommand } from './runner';
+
 import { rebaseInProgress } from './rebase_in_progress';
 
 type TRebaseResult = 'REBASE_CONFLICT' | 'REBASE_DONE';

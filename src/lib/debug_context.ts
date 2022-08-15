@@ -15,11 +15,11 @@ import {
 } from './git/branch_ops';
 import { getCommitTree } from './git/commit_tree';
 import { getShaOrThrow } from './git/get_sha';
+import { runGitCommand } from './git/runner';
 import { getBranchNamesAndRevisions } from './git/sorted_branch_names';
 import { TRepoConfig } from './spiffy/repo_config_spf';
 import { TUserConfig } from './spiffy/user_config_spf';
 import { cuteString } from './utils/cute_string';
-import { runGitCommand } from './utils/run_command';
 import { TSplog } from './utils/splog';
 
 type TState = {

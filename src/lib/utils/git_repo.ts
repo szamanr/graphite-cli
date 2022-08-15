@@ -2,11 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { USER_CONFIG_OVERRIDE_ENV } from '../context';
 import { rebaseInProgress } from '../git/rebase_in_progress';
-import {
-  runCommand,
-  runGitCommand,
-  runGitCommandAndSplitLines,
-} from './run_command';
+import { runCommand } from './run_command';
 
 const TEXT_FILE_NAME = 'test.txt';
 export class GitRepo {
@@ -22,16 +18,16 @@ export class GitRepo {
       return;
     }
     if (opts?.repoUrl) {
-      runGitCommand({
+      runCommand({
+        command: 'git',
         args: [`clone`, opts.repoUrl, dir],
         onError: 'throw',
-        resource: null,
       });
     } else {
-      runGitCommand({
+      runCommand({
+        command: 'git',
         args: [`init`, dir, `-b`, `main`],
         onError: 'throw',
-        resource: null,
       });
     }
   }
@@ -58,14 +54,14 @@ export class GitRepo {
   }
 
   runGitCommand(args: string[], opts?: { cwd?: string }): void {
-    runGitCommand({
+    runCommand({
+      command: 'git',
       args,
       options: {
         stdio: process.env.DEBUG ? 'inherit' : 'pipe',
         cwd: opts?.cwd || this.dir,
       },
       onError: 'ignore',
-      resource: null,
     });
   }
 
@@ -96,53 +92,53 @@ export class GitRepo {
     );
     fs.writeFileSync(filePath, textValue);
     if (!unstaged) {
-      runGitCommand({
+      runCommand({
+        command: 'git',
         args: [`add`, filePath],
         options: { cwd: this.dir },
         onError: 'throw',
-        resource: null,
       });
     }
   }
 
   createChangeAndCommit(textValue: string, prefix?: string): void {
     this.createChange(textValue, prefix);
-    runGitCommand({
+    runCommand({
+      command: 'git',
       args: [`add`, `.`],
       options: { cwd: this.dir },
       onError: 'throw',
-      resource: null,
     });
-    runGitCommand({
+    runCommand({
+      command: 'git',
       args: [`commit`, `-m`, textValue],
       options: { cwd: this.dir },
       onError: 'throw',
-      resource: null,
     });
   }
 
   createChangeAndAmend(textValue: string, prefix?: string): void {
     this.createChange(textValue, prefix);
-    runGitCommand({
+    runCommand({
+      command: 'git',
       args: [`add`, `.`],
       options: { cwd: this.dir },
       onError: 'throw',
-      resource: null,
     });
-    runGitCommand({
+    runCommand({
+      command: 'git',
       args: [`commit`, `--amend`, `--no-edit`],
       options: { cwd: this.dir },
       onError: 'throw',
-      resource: null,
     });
   }
 
   deleteBranch(name: string): void {
-    runGitCommand({
+    runCommand({
+      command: 'git',
       args: [`branch`, `-D`, name],
       options: { cwd: this.dir },
       onError: 'throw',
-      resource: null,
     });
   }
 
@@ -158,26 +154,26 @@ export class GitRepo {
   }
 
   createAndCheckoutBranch(name: string): void {
-    runGitCommand({
+    runCommand({
+      command: 'git',
       args: [`checkout`, `-b`, name],
       options: {
         stdio: process.env.DEBUG ? 'inherit' : 'pipe',
         cwd: this.dir,
       },
       onError: 'throw',
-      resource: null,
     });
   }
 
   checkoutBranch(name: string): void {
-    runGitCommand({
+    runCommand({
+      command: 'git',
       args: [`checkout`, name],
       options: {
         stdio: process.env.DEBUG ? 'inherit' : 'pipe',
         cwd: this.dir,
       },
       onError: 'throw',
-      resource: null,
     });
   }
 
@@ -186,66 +182,68 @@ export class GitRepo {
   }
 
   resolveMergeConflicts(): void {
-    runGitCommand({
+    runCommand({
+      command: 'git',
       args: [`checkout`, `--theirs`, `.`],
       options: {
         stdio: process.env.DEBUG ? 'inherit' : 'pipe',
         cwd: this.dir,
       },
       onError: 'throw',
-      resource: null,
     });
   }
 
   markMergeConflictsAsResolved(): void {
-    runGitCommand({
+    runCommand({
+      command: 'git',
       args: [`add`, `.`],
       options: {
         stdio: process.env.DEBUG ? 'inherit' : 'pipe',
         cwd: this.dir,
       },
       onError: 'throw',
-      resource: null,
     });
   }
 
   currentBranchName(): string {
-    return runGitCommand({
+    return runCommand({
+      command: 'git',
       args: [`branch`, `--show-current`],
       options: { cwd: this.dir },
       onError: 'ignore',
-      resource: null,
     });
   }
 
   getRef(refName: string): string {
-    return runGitCommand({
+    return runCommand({
+      command: 'git',
       args: [`show-ref`, `-s`, refName],
       options: { cwd: this.dir },
       onError: 'ignore',
-      resource: null,
     });
   }
 
   listCurrentBranchCommitMessages(): string[] {
-    return runGitCommandAndSplitLines({
+    return runCommand({
+      command: 'git',
       args: [`log`, `--oneline`, `--format=%B`],
       options: { cwd: this.dir },
       onError: 'ignore',
-      resource: null,
-    });
+    })
+      .split('\n')
+      .filter((l) => l.length > 0);
   }
 
   mergeBranch(args: { branch: string; mergeIn: string }): void {
     this.checkoutBranch(args.branch);
-    runGitCommand({
+    runCommand({
+      command: 'git',
       args: [`merge`, args.mergeIn],
       options: {
         cwd: this.dir,
         stdio: process.env.DEBUG ? 'inherit' : 'pipe',
       },
       onError: 'throw',
-      resource: null,
     });
   }
 }

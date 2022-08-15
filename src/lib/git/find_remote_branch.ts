@@ -1,4 +1,4 @@
-import { runGitCommandAndSplitLines } from '../utils/run_command';
+import { runGitCommandAndSplitLines } from './runner';
 
 export function findRemoteBranch(remote: string): string | undefined {
   // e.g. for most repos: branch.main.remote origin

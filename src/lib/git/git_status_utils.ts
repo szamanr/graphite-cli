@@ -1,4 +1,4 @@
-import { runGitCommand } from '../utils/run_command';
+import { runGitCommand } from './runner';
 
 function doChangesExist(args: string[]): boolean {
   return (

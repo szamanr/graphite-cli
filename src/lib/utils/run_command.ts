@@ -1,40 +1,12 @@
 import { spawnSync, SpawnSyncOptions } from 'child_process';
 import { CommandFailedError, KilledError } from '../errors';
-import { cuteString } from './cute_string';
-import { tracer } from './tracer';
 
-type TRunCommandParameters = {
+export type TRunCommandParameters = {
   command: string;
   args: string[];
   options?: Omit<SpawnSyncOptions, 'encoding' | 'maxBuffer'>;
   onError: (() => void) | 'throw' | 'ignore';
 };
-
-export function runGitCommandAndSplitLines(
-  params: Omit<TRunCommandParameters, 'command'> & { resource: string | null }
-): string[] {
-  return runGitCommand(params)
-    .split('\n')
-    .filter((l) => l.length > 0);
-}
-
-export function runGitCommand(
-  params: Omit<TRunCommandParameters, 'command'> & { resource: string | null }
-): string {
-  // Only measure if we're with an existing span.
-  return params.resource && tracer.currentSpanId
-    ? tracer.spanSync(
-        {
-          name: 'spawnedCommand',
-          resource: params.resource,
-          meta: { runCommandArgs: cuteString(params) },
-        },
-        () => {
-          return runCommand({ command: 'git', ...params });
-        }
-      )
-    : runCommand({ command: 'git', ...params });
-}
 
 export function runCommand(params: TRunCommandParameters): string {
   const spawnSyncOutput = spawnSync(params.command, params.args, {

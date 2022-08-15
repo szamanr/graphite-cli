@@ -1,4 +1,4 @@
-import { runGitCommand } from '../utils/run_command';
+import { runGitCommand } from './runner';
 import { getShaOrThrow } from './get_sha';
 
 const FETCH_HEAD = 'refs/gt-metadata/FETCH_HEAD';
