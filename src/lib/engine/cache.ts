@@ -4,37 +4,9 @@ import {
   NoBranchError,
   PreconditionsFailedError,
 } from '../errors';
-import {
-  deleteBranch,
-  forceCheckoutNewBranch,
-  forceCreateBranch,
-  getCurrentBranchName,
-  moveBranch,
-  switchBranch,
-} from '../git/branch_ops';
-import { commit, TCommitOpts } from '../git/commit';
-import { getCommitRange, TCommitFormat } from '../git/commit_range';
-import { isDiffEmpty } from '../git/diff';
-import {
-  fetchBranch,
-  readFetchBase,
-  readFetchHead,
-  writeFetchBase,
-} from '../git/fetch_branch';
-import { getRemoteSha, getShaOrThrow } from '../git/get_sha';
-import { isMerged } from '../git/is_merged';
-import { getMergeBase } from '../git/merge_base';
-import { pruneRemote } from '../git/prune_remote';
-import { pullBranch } from '../git/pull_branch';
-import { pushBranch } from '../git/push_branch';
-import {
-  rebase,
-  rebaseAbort,
-  rebaseContinue,
-  rebaseInteractive,
-} from '../git/rebase';
-import { softReset, trackedReset } from '../git/reset_branch';
-import { setRemoteTracking } from '../git/set_remote_tracking';
+import { TCommitOpts } from '../git/commit';
+import { TCommitFormat } from '../git/commit_range';
+import { composeGit } from '../git/git';
 import { cuteString } from '../utils/cute_string';
 import { TSplog } from '../utils/splog';
 import {
@@ -165,10 +137,11 @@ export function composeMetaCache({
   remote: string;
   restackCommitterDateIsAuthorDate?: boolean;
 }): TMetaCache {
+  const git = composeGit();
   const cacheLoader = composeCacheLoader(splog);
   void cacheLoader;
   const cache = {
-    currentBranch: currentBranchOverride ?? getCurrentBranchName(),
+    currentBranch: currentBranchOverride ?? git.getCurrentBranchName(),
     branches: cacheLoader.loadCachedBranches(trunkName),
   };
 
@@ -217,7 +190,7 @@ export function composeMetaCache({
     assertBranch(parentBranchName);
     return (
       branchName !== parentBranchName &&
-      getMergeBase(branchName, parentBranchName) ===
+      git.getMergeBase(branchName, parentBranchName) ===
         cache.branches[parentBranchName].branchRevision
     );
   };
@@ -313,7 +286,7 @@ export function composeMetaCache({
       return;
     }
     assertBranch(branchName);
-    switchBranch(branchName);
+    git.switchBranch(branchName);
     cache.currentBranch = branchName;
   };
 
@@ -329,7 +302,7 @@ export function composeMetaCache({
     // Get current meta and ensure this branch isn't trunk.
     const oldCachedMeta = cache.branches[branchName] ?? {
       validationResult: 'BAD_PARENT_NAME',
-      branchRevision: getShaOrThrow(branchName),
+      branchRevision: git.getShaOrThrow(branchName),
       children: [],
     };
     assertCachedMetaIsNotTrunk(oldCachedMeta);
@@ -400,7 +373,7 @@ export function composeMetaCache({
 
     removeChild(cachedMeta.parentBranchName, branchName);
     delete cache.branches[branchName];
-    deleteBranch(branchName);
+    git.deleteBranch(branchName);
     deleteMetadataRef(branchName);
   };
 
@@ -412,12 +385,12 @@ export function composeMetaCache({
 
     updateMeta(branchName, {
       ...cachedMeta,
-      branchRevision: getShaOrThrow(branchName),
+      branchRevision: git.getShaOrThrow(branchName),
       parentBranchRevision,
     });
 
     if (cache.currentBranch && cache.currentBranch in cache.branches) {
-      switchBranch(cache.currentBranch);
+      git.switchBranch(cache.currentBranch);
     }
   };
 
@@ -465,7 +438,7 @@ export function composeMetaCache({
         validationResult: 'VALID',
         parentBranchName,
         // This is parentMeta.branchRevision unless parent is trunk
-        parentBranchRevision: getMergeBase(branchName, parentBranchName),
+        parentBranchRevision: git.getMergeBase(branchName, parentBranchName),
       });
       return 'TRACKED';
     },
@@ -511,7 +484,7 @@ export function composeMetaCache({
     getAllCommits: (branchName: string, format: TCommitFormat) => {
       const meta = assertBranchIsValidOrTrunkAndGetMeta(branchName);
 
-      return getCommitRange(
+      return git.getCommitRange(
         // for trunk, commit range is just one commit
         meta.validationResult === 'TRUNK'
           ? undefined
@@ -565,7 +538,7 @@ export function composeMetaCache({
       const parentCachedMeta =
         assertBranchIsValidOrTrunkAndGetMeta(parentBranchName);
       validateNewParent(branchName, parentBranchName);
-      switchBranch(branchName, { new: true });
+      git.switchBranch(branchName, { new: true });
       updateMeta(branchName, {
         validationResult: 'VALID',
         parentBranchName,
@@ -584,7 +557,7 @@ export function composeMetaCache({
       const cachedMeta =
         assertBranchIsValidAndNotTrunkAndGetMeta(currentBranchName);
 
-      moveBranch(branchName);
+      git.moveBranch(branchName);
       updateMeta(branchName, { ...cachedMeta, prInfo: {} });
 
       cachedMeta.children.forEach((childBranchName) =>
@@ -618,7 +591,7 @@ export function composeMetaCache({
           );
         deleteAllBranchData(parentBranchName);
       } else {
-        forceCheckoutNewBranch(parentBranchName, cachedMeta.branchRevision);
+        git.forceCheckoutNewBranch(parentBranchName, cachedMeta.branchRevision);
         updateMeta(parentBranchName, {
           ...parentCachedMeta,
           branchRevision: cachedMeta.branchRevision,
@@ -646,45 +619,47 @@ export function composeMetaCache({
     commit: (opts: TCommitOpts) => {
       const branchName = getCurrentBranchOrThrow();
       const cachedMeta = assertBranchIsValidAndNotTrunkAndGetMeta(branchName);
-      commit({ ...opts, noVerify });
+      git.commit({ ...opts, noVerify });
       cache.branches[branchName] = {
         ...cachedMeta,
-        branchRevision: getShaOrThrow(branchName),
+        branchRevision: git.getShaOrThrow(branchName),
       };
     },
     squashCurrentBranch: (opts: Pick<TCommitOpts, 'message' | 'noEdit'>) => {
       const branchName = getCurrentBranchOrThrow();
       const cachedMeta = assertBranchIsValidAndNotTrunkAndGetMeta(branchName);
-      softReset(
-        getCommitRange(
-          cachedMeta.parentBranchRevision,
-          cachedMeta.branchRevision,
-          'SHA'
-        ).reverse()[0]
+      git.softReset(
+        git
+          .getCommitRange(
+            cachedMeta.parentBranchRevision,
+            cachedMeta.branchRevision,
+            'SHA'
+          )
+          .reverse()[0]
       );
-      commit({
+      git.commit({
         ...opts,
         amend: true,
         noVerify,
         rollbackOnError: () => {
-          softReset(cachedMeta.branchRevision);
+          git.softReset(cachedMeta.branchRevision);
         },
       });
       cache.branches[branchName] = {
         ...cachedMeta,
-        branchRevision: getShaOrThrow(branchName),
+        branchRevision: git.getShaOrThrow(branchName),
       };
     },
     detach() {
       const branchName = getCurrentBranchOrThrow();
       const cachedMeta = assertBranchIsValidAndNotTrunkAndGetMeta(branchName);
-      switchBranch(cachedMeta.branchRevision, { detach: true });
+      git.switchBranch(cachedMeta.branchRevision, { detach: true });
     },
     detachAndResetBranchChanges() {
       const branchName = getCurrentBranchOrThrow();
       const cachedMeta = assertBranchIsValidAndNotTrunkAndGetMeta(branchName);
-      switchBranch(cachedMeta.branchRevision, { detach: true });
-      trackedReset(cachedMeta.parentBranchRevision);
+      git.switchBranch(cachedMeta.branchRevision, { detach: true });
+      git.trackedReset(cachedMeta.parentBranchRevision);
     },
     applySplitToCommits({
       branchToSplit,
@@ -715,8 +690,10 @@ export function composeMetaCache({
         revision: cachedMeta.parentBranchRevision,
       };
       branchNames.forEach((branchName, idx) => {
-        const branchRevision = getShaOrThrow(`@~${reversedBranchPoints[idx]}`);
-        forceCreateBranch(branchName, branchRevision);
+        const branchRevision = git.getShaOrThrow(
+          `@~${reversedBranchPoints[idx]}`
+        );
+        git.forceCreateBranch(branchName, branchRevision);
         updateMeta(branchName, {
           validationResult: 'VALID',
           branchRevision,
@@ -737,10 +714,10 @@ export function composeMetaCache({
         deleteAllBranchData(branchToSplit);
       }
       cache.currentBranch = lastBranch.name;
-      switchBranch(lastBranch.name);
+      git.switchBranch(lastBranch.name);
     },
     forceCheckoutBranch: (branchToSplit: string) => {
-      switchBranch(branchToSplit, { force: true });
+      git.switchBranch(branchToSplit, { force: true });
     },
     restackBranch: (branchName: string) => {
       const cachedMeta = assertBranchIsValidOrTrunkAndGetMeta(branchName);
@@ -753,7 +730,7 @@ export function composeMetaCache({
         cache.branches[cachedMeta.parentBranchName].branchRevision;
 
       if (
-        rebase({
+        git.rebase({
           branchName,
           onto: cachedMeta.parentBranchName,
           from: cachedMeta.parentBranchRevision,
@@ -772,7 +749,7 @@ export function composeMetaCache({
       const cachedMeta = assertBranchIsValidAndNotTrunkAndGetMeta(branchName);
 
       if (
-        rebaseInteractive({
+        git.rebaseInteractive({
           branchName,
           parentBranchRevision: cachedMeta.parentBranchRevision,
         }) === 'REBASE_CONFLICT'
@@ -787,11 +764,11 @@ export function composeMetaCache({
       return { result: 'REBASE_DONE' };
     },
     continueRebase: (parentBranchRevision: string) => {
-      const result = rebaseContinue();
+      const result = git.rebaseContinue();
       if (result === 'REBASE_CONFLICT') {
         return { result };
       }
-      const branchName = getCurrentBranchName();
+      const branchName = git.getCurrentBranchName();
       if (!branchName) {
         throw new PreconditionsFailedError(
           'Must be on a branch after a rebase.'
@@ -802,37 +779,37 @@ export function composeMetaCache({
       return { result, branchName };
     },
     abortRebase: () => {
-      rebaseAbort();
+      git.rebaseAbort();
     },
     isMergedIntoTrunk: (branchName: string) => {
       assertBranch(branchName);
       const trunkName = assertTrunk();
-      return isMerged({ branchName, trunkName });
+      return git.isMerged({ branchName, trunkName });
     },
     isBranchFixed,
     isBranchEmpty: (branchName: string) => {
       assertBranch(branchName);
       const cachedMeta = assertBranchIsValidAndNotTrunkAndGetMeta(branchName);
-      return isDiffEmpty(branchName, cachedMeta.parentBranchRevision);
+      return git.isDiffEmpty(branchName, cachedMeta.parentBranchRevision);
     },
     branchMatchesRemote: (branchName: string) => {
       const cachedMeta = assertBranchIsValidOrTrunkAndGetMeta(branchName);
-      const remoteParentRevision = getRemoteSha(branchName, remote);
+      const remoteParentRevision = git.getRemoteSha(branchName, remote);
       return cachedMeta.branchRevision === remoteParentRevision;
     },
     pushBranch: (branchName: string, forcePush: boolean) => {
       assertBranchIsValidAndNotTrunkAndGetMeta(branchName);
-      pushBranch({ remote, branchName, noVerify, forcePush });
+      git.pushBranch({ remote, branchName, noVerify, forcePush });
     },
     pullTrunk: () => {
-      pruneRemote(remote);
+      git.pruneRemote(remote);
       const currentBranchName = getCurrentBranchOrThrow();
       const trunkName = assertTrunk();
       const oldTrunkCachedMeta = cache.branches[trunkName];
       try {
-        switchBranch(trunkName);
-        pullBranch(remote, trunkName);
-        const newTrunkRevision = getShaOrThrow(trunkName);
+        git.switchBranch(trunkName);
+        git.pullBranch(remote, trunkName);
+        const newTrunkRevision = git.getShaOrThrow(trunkName);
         cache.branches[trunkName] = {
           ...oldTrunkCachedMeta,
           branchRevision: newTrunkRevision,
@@ -841,26 +818,26 @@ export function composeMetaCache({
           ? 'PULL_UNNEEDED'
           : 'PULL_DONE';
       } finally {
-        switchBranch(currentBranchName);
+        git.switchBranch(currentBranchName);
       }
     },
     fetchBranch: (branchName: string, parentBranchName: string) => {
       const parentMeta = assertBranchIsValidOrTrunkAndGetMeta(parentBranchName);
       if (parentMeta.validationResult === 'TRUNK') {
         // If this is a trunk-child, its base is its merge base with trunk.
-        fetchBranch(remote, branchName);
-        writeFetchBase(
-          getMergeBase(readFetchHead(), parentMeta.branchRevision)
+        git.fetchBranch(remote, branchName);
+        git.writeFetchBase(
+          git.getMergeBase(git.readFetchHead(), parentMeta.branchRevision)
         );
       } else {
         // Otherwise, its base is the head of the previous fetch
-        writeFetchBase(readFetchHead());
-        fetchBranch(remote, branchName);
+        git.writeFetchBase(git.readFetchHead());
+        git.fetchBranch(remote, branchName);
       }
     },
     branchMatchesFetched: (branchName: string) => {
       assertBranch(branchName);
-      return cache.branches[branchName].branchRevision === readFetchHead();
+      return cache.branches[branchName].branchRevision === git.readFetchHead();
     },
     checkoutBranchFromFetched: (
       branchName: string,
@@ -868,9 +845,12 @@ export function composeMetaCache({
     ) => {
       validateNewParent(branchName, parentBranchName);
       assertBranch(parentBranchName);
-      const { head, base } = { head: readFetchHead(), base: readFetchBase() };
-      forceCheckoutNewBranch(branchName, head);
-      setRemoteTracking({ remote, branchName, sha: head });
+      const { head, base } = {
+        head: git.readFetchHead(),
+        base: git.readFetchBase(),
+      };
+      git.forceCheckoutNewBranch(branchName, head);
+      git.setRemoteTracking({ remote, branchName, sha: head });
 
       updateMeta(branchName, {
         validationResult: 'VALID',
@@ -884,15 +864,18 @@ export function composeMetaCache({
     rebaseBranchOntoFetched: (branchName: string) => {
       const cachedMeta = assertBranchIsValidAndNotTrunkAndGetMeta(branchName);
 
-      const { head, base } = { head: readFetchHead(), base: readFetchBase() };
-      setRemoteTracking({ remote, branchName, sha: head });
+      const { head, base } = {
+        head: git.readFetchHead(),
+        base: git.readFetchBase(),
+      };
+      git.setRemoteTracking({ remote, branchName, sha: head });
 
       // setting the current branch to this branch is correct in either case
       // failure case, we want it so that currentBranchOverride will be set
       // success case, it ends up as HEAD after the rebase.
       cache.currentBranch = branchName;
       if (
-        rebase({
+        git.rebase({
           onto: head,
           from: cachedMeta.parentBranchRevision,
           branchName,
