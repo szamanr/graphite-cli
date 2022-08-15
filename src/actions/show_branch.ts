@@ -1,8 +1,6 @@
 import chalk from 'chalk';
 import { TContext } from '../lib/context';
 import { TBranchPRInfo } from '../lib/engine/metadata_ref';
-import { showDiff } from '../lib/git/diff';
-import { showCommits } from '../lib/git/show_commits';
 
 export async function showBranchInfo(
   branchName: string,
@@ -30,25 +28,12 @@ export async function showBranchInfo(
 
   output.push('');
   output.push(
-    showCommits(
-      context.metaCache.isTrunk(branchName)
-        ? `${branchName}~`
-        : context.metaCache.getBaseRevision(branchName),
-      branchName,
-      opts.patch && !opts.diff
-    )
+    context.metaCache.showCommits(branchName, opts.patch && !opts.diff)
   );
 
   if (opts.diff) {
     output.push('');
-    output.push(
-      showDiff(
-        context.metaCache.isTrunk(branchName)
-          ? `${branchName}~`
-          : context.metaCache.getBaseRevision(branchName),
-        branchName
-      )
-    );
+    output.push(context.metaCache.showDiff(branchName));
   }
 
   context.splog.page(output.join('\n'));

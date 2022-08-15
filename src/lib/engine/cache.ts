@@ -51,6 +51,9 @@ export type TMetaCache = {
   getUnmergedFiles: () => string[];
   getRebaseHead: () => string | undefined;
 
+  showCommits: (branchName: string, patch: boolean) => string;
+  showDiff: (branchName: string) => string;
+
   getRevision: (branchName: string) => string;
   getBaseRevision: (branchName: string) => string;
   getAllCommits: (branchName: string, format: TCommitFormat) => string[];
@@ -486,6 +489,25 @@ export function composeMetaCache({
     findRemoteBranch: () => git.findRemoteBranch(remote),
     getUnmergedFiles: git.getUnmergedFiles,
     getRebaseHead: git.getRebaseHead,
+    showCommits: (branchName: string, patch: boolean) => {
+      const meta = assertBranchIsValidOrTrunkAndGetMeta(branchName);
+      return git.showCommits(
+        meta.validationResult === 'TRUNK'
+          ? `${branchName}~`
+          : meta.parentBranchRevision,
+        branchName,
+        patch
+      );
+    },
+    showDiff: (branchName: string) => {
+      const meta = assertBranchIsValidOrTrunkAndGetMeta(branchName);
+      return git.showDiff(
+        meta.validationResult === 'TRUNK'
+          ? `${branchName}~`
+          : meta.parentBranchRevision,
+        branchName
+      );
+    },
     getRevision: (branchName: string) => {
       assertBranch(branchName);
       const meta = cache.branches[branchName];
