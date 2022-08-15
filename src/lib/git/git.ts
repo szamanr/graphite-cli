@@ -46,7 +46,8 @@ import { setRemoteTracking } from './set_remote_tracking';
 import { showCommits } from './show_commits';
 import { getBranchNamesAndRevisions } from './sorted_branch_names';
 
-export function composeGit(): ReturnType<typeof composeGitInternal> {
+export type TGit = ReturnType<typeof composeGitInternal>;
+export function composeGit(): TGit {
   return composeGitInternal();
 }
 
