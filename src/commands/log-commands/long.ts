@@ -1,5 +1,4 @@
 import yargs from 'yargs';
-import { logLong } from '../../lib/git/log';
 import { graphite } from '../../lib/runner';
 
 const args = {} as const;
@@ -12,6 +11,5 @@ export const aliases = ['l'];
 export const canonical = 'log long';
 
 type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
-export const handler = async (argv: argsT): Promise<void> => {
-  return graphite(argv, canonical, async () => logLong());
-};
+export const handler = async (argv: argsT): Promise<void> =>
+  graphite(argv, canonical, async (context) => context.metaCache.logLong());

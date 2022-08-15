@@ -1,4 +1,4 @@
-import { runGitCommand, runGitCommandAndSplitLines } from '../git/runner';
+import { runGitCommand, runGitCommandAndSplitLines } from './runner';
 import { getSha } from './get_sha';
 
 export function getCommitTree(branchNames: string[]): Record<string, string[]> {

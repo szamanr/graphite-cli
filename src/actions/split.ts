@@ -4,7 +4,6 @@ import { GRAPHITE_COLORS } from '../lib/colors';
 import { TContext } from '../lib/context';
 import { SCOPE } from '../lib/engine/scope_spec';
 import { KilledError, PreconditionsFailedError } from '../lib/errors';
-import { getUnstagedChanges } from '../lib/git/diff';
 import { uncommittedTrackedChangesPrecondition } from '../lib/preconditions';
 import { replaceUnsupportedCharacters } from '../lib/utils/branch_name';
 import { clearPromptResultLine } from '../lib/utils/prompts_helpers';
@@ -275,9 +274,9 @@ async function splitByHunk(
       .reverse()
       .join('\n\n');
     for (
-      let unstagedChanges = getUnstagedChanges();
+      let unstagedChanges = context.metaCache.getUnstagedChanges();
       unstagedChanges.length > 0;
-      unstagedChanges = getUnstagedChanges()
+      unstagedChanges = context.metaCache.getUnstagedChanges()
     ) {
       context.splog.info(instructions);
       context.splog.newline();

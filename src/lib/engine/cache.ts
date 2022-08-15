@@ -50,6 +50,8 @@ export type TMetaCache = {
   findRemoteBranch: () => string | undefined;
   getUnmergedFiles: () => string[];
   getRebaseHead: () => string | undefined;
+  getUnstagedChanges: () => string;
+  logLong: () => void;
 
   showCommits: (branchName: string, patch: boolean) => string;
   showDiff: (branchName: string) => string;
@@ -489,6 +491,8 @@ export function composeMetaCache({
     findRemoteBranch: () => git.findRemoteBranch(remote),
     getUnmergedFiles: git.getUnmergedFiles,
     getRebaseHead: git.getRebaseHead,
+    getUnstagedChanges: git.getUnstagedChanges,
+    logLong: git.logLong,
     showCommits: (branchName: string, patch: boolean) => {
       const meta = assertBranchIsValidOrTrunkAndGetMeta(branchName);
       return git.showCommits(
