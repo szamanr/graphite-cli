@@ -1,5 +1,6 @@
 import { upsertPrInfoForBranches } from '../actions/sync_pr_info';
 import { composeMetaCache, TMetaCache } from './engine/cache';
+import { TGit } from './git/git';
 import { rebaseInProgress } from './git/rebase_in_progress';
 import {
   continueConfigFactory,
@@ -26,6 +27,7 @@ export type TContextLite = {
   surveyConfig: TSurveyConfig;
   userConfig: TUserConfig;
   messageConfig: TMessageConfig;
+  userEmail?: string;
 };
 
 type TRepoContext = {
@@ -38,6 +40,7 @@ export function initContextLite(opts?: {
   interactive?: boolean;
   quiet?: boolean;
   debug?: boolean;
+  userEmail?: string;
 }): TContextLite {
   const userConfig = userConfigFactory.load(
     process.env[USER_CONFIG_OVERRIDE_ENV]
@@ -55,6 +58,7 @@ export function initContextLite(opts?: {
     surveyConfig: surveyConfigFactory.load(),
     userConfig,
     messageConfig: messageConfigFactory.load(),
+    userEmail: opts?.userEmail,
   };
 }
 
@@ -62,6 +66,7 @@ export type TContext = TRepoContext & TContextLite;
 
 export function initContext(
   contextLite: TContextLite,
+  git: TGit,
   opts?: {
     verify?: boolean;
   }
@@ -72,6 +77,7 @@ export function initContext(
   }
   const continueConfig = continueConfigFactory.load();
   const metaCache = composeMetaCache({
+    git,
     trunkName: repoConfig.data.trunk,
     currentBranchOverride: continueConfig.data.currentBranchOverride,
     splog: contextLite.splog,

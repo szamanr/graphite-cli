@@ -6,7 +6,7 @@ import {
 } from '../errors';
 import { TCommitOpts } from '../git/commit';
 import { TCommitFormat } from '../git/commit_range';
-import { composeGit } from '../git/git';
+import { TGit } from '../git/git';
 import { cuteString } from '../utils/cute_string';
 import { TSplog } from '../utils/splog';
 import {
@@ -135,6 +135,7 @@ export type TMetaCache = {
 
 // eslint-disable-next-line max-lines-per-function
 export function composeMetaCache({
+  git,
   trunkName,
   currentBranchOverride,
   splog,
@@ -142,6 +143,7 @@ export function composeMetaCache({
   remote,
   restackCommitterDateIsAuthorDate,
 }: {
+  git: TGit;
   trunkName?: string;
   currentBranchOverride?: string;
   splog: TSplog;
@@ -149,7 +151,6 @@ export function composeMetaCache({
   remote: string;
   restackCommitterDateIsAuthorDate?: boolean;
 }): TMetaCache {
-  const git = composeGit();
   const cacheLoader = composeCacheLoader(splog);
   void cacheLoader;
   const cache = {

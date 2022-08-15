@@ -1,6 +1,7 @@
 import yargs from 'yargs';
 import { initContext, initContextLite } from '../../lib/context';
 import { getCacheLock } from '../../lib/engine/cache_lock';
+import { composeGit } from '../../lib/git/git';
 
 export const command = 'cache';
 export const canonical = 'dev cache';
@@ -19,7 +20,7 @@ type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 export const handler = async (argv: argsT): Promise<void> => {
   const cacheLock = getCacheLock();
   cacheLock.lock();
-  const context = initContext(initContextLite({ debug: true }));
+  const context = initContext(initContextLite({ debug: true }), composeGit());
   if (argv.clear) {
     context.metaCache.clear();
   }

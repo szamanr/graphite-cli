@@ -25,7 +25,7 @@ import {
   RebaseConflictError,
   UntrackedBranchError,
 } from './errors';
-import { getUserEmail } from './git/get_email';
+import { composeGit } from './git/git';
 import { TGlobalArguments } from './global_arguments';
 import { tracer } from './utils/tracer';
 
@@ -71,7 +71,11 @@ async function graphiteInternal(
     // eslint-disable-next-line no-restricted-syntax
     process.exit(1);
   });
-  const contextLite = initContextLite(args);
+  const git = composeGit();
+  const contextLite = initContextLite({
+    ...args,
+    userEmail: git.getUserEmail(),
+  });
 
   try {
     await tracer.span(
@@ -79,7 +83,7 @@ async function graphiteInternal(
         name: 'command',
         resource: canonicalName,
         meta: {
-          user: getUserEmail() || 'NotFound',
+          user: contextLite.userEmail ?? 'NotFound',
           version: version,
           processArgv: process.argv.join(' '),
         },
@@ -92,7 +96,7 @@ async function graphiteInternal(
           return;
         }
 
-        const context = initContext(contextLite, args);
+        const context = initContext(contextLite, git, args);
         return await graphiteHelper(
           canonicalName,
           handlerMaybeWithCacheLock,

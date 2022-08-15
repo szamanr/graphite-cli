@@ -3,7 +3,7 @@ import { request } from '@withgraphite/retyped-routes';
 import { version } from '../../package.json';
 import { API_SERVER } from '../lib/api/server';
 import { TContextLite } from '../lib/context';
-import { getUserEmail } from '../lib/git/get_email';
+import { composeGit } from '../lib/git/git';
 import {
   messageConfigFactory,
   TMessageConfig,
@@ -32,13 +32,13 @@ async function fetchUpgradePrompt(
     return;
   }
   try {
-    const user = getUserEmail();
+    const user = composeGit().getUserEmail();
     const response = await request.requestWithArgs(
       API_SERVER,
       API_ROUTES.upgradePrompt,
       {},
       {
-        user: user || 'NotFound',
+        user: user ?? 'NotFound',
         currentVersion: version,
       }
     );

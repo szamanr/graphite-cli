@@ -5,6 +5,7 @@ import {
   initContextLite,
   TContext,
 } from '../../../src/lib/context';
+import { composeGit } from '../../../src/lib/git/git';
 import { cuteString } from '../../../src/lib/utils/cute_string';
 import { GitRepo } from '../../../src/lib/utils/git_repo';
 
@@ -55,6 +56,7 @@ export abstract class AbstractScene {
         quiet: !process.env.DEBUG,
         debug: !!process.env.DEBUG,
       }),
+      composeGit(),
       {
         verify: false,
       }

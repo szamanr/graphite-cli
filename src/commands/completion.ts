@@ -1,5 +1,5 @@
 import yargs, { Arguments } from 'yargs';
-import { getBranchNamesAndRevisions } from '../lib/git/sorted_branch_names';
+import { composeGit } from '../lib/git/git';
 
 yargs.completion(
   'completion',
@@ -10,7 +10,7 @@ yargs.completion(
     return shouldCompleteBranch(current, argv)
       ? // we don't want to load a full context here, so we'll just use the git call directly
         // once we persist the meta cache to disk, we can consider using a context here
-        done(Object.keys(getBranchNamesAndRevisions()))
+        done(Object.keys(composeGit().getBranchNamesAndRevisions()))
       : defaultCompletion();
   }
 );

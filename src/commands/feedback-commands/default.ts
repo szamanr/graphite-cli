@@ -5,7 +5,6 @@ import yargs from 'yargs';
 import { API_SERVER } from '../../lib/api/server';
 import { captureState } from '../../lib/debug_context';
 import { ExitFailedError } from '../../lib/errors';
-import { getUserEmail } from '../../lib/git/get_email';
 import { graphite } from '../../lib/runner';
 
 const args = {
@@ -34,7 +33,6 @@ export const builder = args;
 
 export const handler = async (argv: argsT): Promise<void> => {
   return graphite(argv, canonical, async (context) => {
-    const user = getUserEmail();
     if (!argv.message) {
       throw new ExitFailedError(`No message provided`);
     }
@@ -43,7 +41,7 @@ export const handler = async (argv: argsT): Promise<void> => {
       API_ROUTES.feedback,
       {
         auth: context.userConfig.data.authToken,
-        user: user || 'NotFound',
+        user: context.userEmail ?? 'NotFound',
         message: argv.message,
         debugContext: argv['with-debug-context']
           ? captureState(context)
