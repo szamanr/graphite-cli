@@ -69,6 +69,7 @@ export type TMetaCache = {
   commit: (opts: TCommitOpts) => void;
   squashCurrentBranch: (opts: { message?: string; noEdit?: boolean }) => void;
 
+  addAll: () => void;
   detach: () => void;
   detachAndResetBranchChanges: () => void;
   applySplitToCommits: (args: {
@@ -650,6 +651,7 @@ export function composeMetaCache({
         branchRevision: git.getShaOrThrow(branchName),
       };
     },
+    addAll: git.addAll,
     detach() {
       const branchName = getCurrentBranchOrThrow();
       const cachedMeta = assertBranchIsValidAndNotTrunkAndGetMeta(branchName);

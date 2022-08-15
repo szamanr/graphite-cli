@@ -5,7 +5,6 @@ import {
   PreconditionsFailedError,
   RebaseConflictError,
 } from '../lib/errors';
-import { addAll } from '../lib/git/add_all';
 import { rebaseInProgress } from '../lib/git/rebase_in_progress';
 import { clearContinuation, persistContinuation } from './persist_continuation';
 import { printConflictStatus } from './print_conflict_status';
@@ -22,7 +21,7 @@ export async function continueAction(
   }
 
   if (opts.addAll) {
-    addAll();
+    context.metaCache.addAll();
   }
   const rebasedBranchBase = context.continueConfig.data.rebasedBranchBase;
   const branchesToSync = context.continueConfig.data?.branchesToSync;
