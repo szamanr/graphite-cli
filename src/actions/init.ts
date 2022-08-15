@@ -6,7 +6,6 @@ import {
   KilledError,
   PreconditionsFailedError,
 } from '../lib/errors';
-import { findRemoteBranch } from '../lib/git/find_remote_branch';
 import { suggest } from '../lib/utils/prompts_helpers';
 import { checkoutBranch } from './checkout_branch';
 import { trackBranchInteractive } from './track_branch';
@@ -61,8 +60,7 @@ async function selectTrunkBranch(
   context: TContext
 ): Promise<string> {
   const inferredTrunk =
-    findRemoteBranch(context.repoConfig.getRemote()) ??
-    findCommonlyNamedTrunk(context);
+    context.metaCache.findRemoteBranch() ?? findCommonlyNamedTrunk(context);
 
   if (!context.interactive) {
     if (inferredTrunk) {

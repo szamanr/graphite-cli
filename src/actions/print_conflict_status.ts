@@ -1,9 +1,5 @@
 import chalk from 'chalk';
 import { TContext } from '../lib/context';
-import {
-  getRebaseHead,
-  getUnmergedFiles,
-} from '../lib/git/merge_conflict_help';
 import { logForConflictStatus } from './log';
 
 export function printConflictStatus(
@@ -15,13 +11,14 @@ export function printConflictStatus(
 
   context.splog.info(chalk.yellow(`Unmerged files:`));
   context.splog.info(
-    getUnmergedFiles()
+    context.metaCache
+      .getUnmergedFiles()
       .map((line) => chalk.redBright(line))
       .join('\n')
   );
   context.splog.newline();
 
-  const rebaseHead = getRebaseHead();
+  const rebaseHead = context.metaCache.getRebaseHead();
   // this should never be undefined in this case, but we don't need to fail here
   if (rebaseHead) {
     context.splog.info(

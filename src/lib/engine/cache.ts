@@ -45,6 +45,12 @@ export type TMetaCache = {
   currentBranch: string | undefined;
   currentBranchPrecondition: string;
 
+  rebaseInProgress: () => boolean;
+  detectStagedChanges: () => boolean;
+  findRemoteBranch: () => string | undefined;
+  getUnmergedFiles: () => string[];
+  getRebaseHead: () => string | undefined;
+
   getRevision: (branchName: string) => string;
   getBaseRevision: (branchName: string) => string;
   getAllCommits: (branchName: string, format: TCommitFormat) => string[];
@@ -475,6 +481,11 @@ export function composeMetaCache({
       assertBranchIsValidOrTrunkAndGetMeta(branchName);
       return branchName;
     },
+    rebaseInProgress: git.rebaseInProgress,
+    detectStagedChanges: git.detectStagedChanges,
+    findRemoteBranch: () => git.findRemoteBranch(remote),
+    getUnmergedFiles: git.getUnmergedFiles,
+    getRebaseHead: git.getRebaseHead,
     getRevision: (branchName: string) => {
       assertBranch(branchName);
       const meta = cache.branches[branchName];

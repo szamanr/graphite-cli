@@ -5,7 +5,6 @@ import {
   PreconditionsFailedError,
   RebaseConflictError,
 } from '../lib/errors';
-import { rebaseInProgress } from '../lib/git/rebase_in_progress';
 import { clearContinuation, persistContinuation } from './persist_continuation';
 import { printConflictStatus } from './print_conflict_status';
 import { restackBranches } from './restack';
@@ -15,7 +14,7 @@ export async function continueAction(
   opts: { addAll: boolean },
   context: TContext
 ): Promise<void> {
-  if (!rebaseInProgress()) {
+  if (!context.metaCache.rebaseInProgress()) {
     clearContinuation(context);
     throw new PreconditionsFailedError(`No Graphite command to continue.`);
   }

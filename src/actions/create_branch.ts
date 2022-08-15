@@ -1,7 +1,6 @@
 import { TContext } from '../lib/context';
 import { SCOPE } from '../lib/engine/scope_spec';
 import { ExitFailedError } from '../lib/errors';
-import { detectStagedChanges } from '../lib/git/diff';
 import { newBranchName } from '../lib/utils/branch_name';
 import { restackBranches } from './restack';
 
@@ -28,7 +27,7 @@ export async function createBranchAction(
     context.metaCache.addAll();
   }
 
-  if (detectStagedChanges()) {
+  if (context.metaCache.detectStagedChanges()) {
     context.metaCache.commit({
       message: opts.message,
       patch: !opts.all && opts.patch,
