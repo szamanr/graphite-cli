@@ -1,6 +1,5 @@
 import { execSync } from 'child_process';
 import { writeMetadataRef } from '../../../src/lib/engine/metadata_ref';
-import { getShaOrThrow } from '../../../src/lib/git/get_sha';
 import { AbstractScene } from './abstract_scene';
 
 export class TrailingProdScene extends AbstractScene {
@@ -26,7 +25,6 @@ export class TrailingProdScene extends AbstractScene {
       'x2',
       {
         parentBranchName: 'x1',
-        parentBranchRevision: getShaOrThrow('x1'),
       },
       this.repo.dir
     );
