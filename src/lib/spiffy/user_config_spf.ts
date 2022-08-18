@@ -1,7 +1,7 @@
 import * as t from '@withgraphite/retype';
 import { execSync } from 'child_process';
-import { CommandFailedError } from '../errors';
 import { getGitEditor, getGitPager } from '../git/git_editor';
+import { CommandFailedError } from '../utils/run_command';
 import { spiffy } from './spiffy';
 
 const schema = t.shape({

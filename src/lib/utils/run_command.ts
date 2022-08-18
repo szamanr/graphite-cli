@@ -1,5 +1,4 @@
 import { spawnSync, SpawnSyncOptions } from 'child_process';
-import { CommandFailedError, KilledError } from '../errors';
 
 export type TRunCommandParameters = {
   command: string;
@@ -23,7 +22,13 @@ export function runCommand(params: TRunCommandParameters): string {
 
   // if killed with a signal
   if (spawnSyncOutput.signal) {
-    throw new KilledError();
+    throw new CommandKilledError({
+      command: params.command,
+      args: params.args,
+      signal: spawnSyncOutput.signal,
+      stdout: spawnSyncOutput.stdout,
+      stderr: spawnSyncOutput.stderr,
+    });
   }
 
   // command succeeded, return output
@@ -48,4 +53,44 @@ export function runCommand(params: TRunCommandParameters): string {
     stdout: spawnSyncOutput.stdout,
     stderr: spawnSyncOutput.stderr,
   });
+}
+
+export class CommandFailedError extends Error {
+  constructor(failure: {
+    command: string;
+    args: string[];
+    status: number;
+    stdout: string;
+    stderr: string;
+  }) {
+    super(
+      [
+        `Command failed with exit code ${failure.status}:`,
+        [failure.command].concat(failure.args).join(' '),
+        failure.stdout,
+        failure.stderr,
+      ].join('\n')
+    );
+    this.name = 'CommandFailed';
+  }
+}
+
+export class CommandKilledError extends Error {
+  constructor(failure: {
+    command: string;
+    args: string[];
+    signal: string;
+    stdout: string;
+    stderr: string;
+  }) {
+    super(
+      [
+        `Command killed with signal ${failure.signal}:`,
+        [failure.command].concat(failure.args).join(' '),
+        failure.stdout,
+        failure.stderr,
+      ].join('\n')
+    );
+    this.name = 'CommandKilled';
+  }
 }

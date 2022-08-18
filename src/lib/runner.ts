@@ -17,7 +17,6 @@ import {
 import { getCacheLock, TCacheLock } from './engine/cache_lock';
 import {
   BadTrunkOperationError,
-  CommandFailedError,
   ConcurrentExecutionError,
   ExitFailedError,
   KilledError,
@@ -27,6 +26,7 @@ import {
 } from './errors';
 import { composeGit } from './git/git';
 import { TGlobalArguments } from './global_arguments';
+import { CommandFailedError, CommandKilledError } from './utils/run_command';
 import { tracer } from './utils/tracer';
 
 export async function graphite(
@@ -158,6 +158,7 @@ async function graphiteHelper(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function handleGraphiteError(err: any, context: TContextLite): void {
   switch (err.constructor) {
+    case CommandKilledError:
     case KilledError: // the user doesn't need a message if they ended gt
     case RebaseConflictError: // we've already logged a message
       // pass

@@ -1,70 +1,48 @@
 import chalk from 'chalk';
 
-class ExitError extends Error {}
-
-export class ExitFailedError extends ExitError {
+export class ExitFailedError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'ExitFailed';
   }
 }
 
-export class CommandFailedError extends ExitError {
-  constructor(failure: {
-    command: string;
-    args: string[];
-    status: number;
-    stdout: string;
-    stderr: string;
-  }) {
-    super(
-      [
-        `Command failed with exit code ${failure.status}:`,
-        [failure.command].concat(failure.args).join(' '),
-        failure.stdout,
-        failure.stderr,
-      ].join('\n')
-    );
-    this.name = 'CommandFailed';
-  }
-}
-
-export class RebaseConflictError extends ExitError {
+export class RebaseConflictError extends Error {
   constructor() {
     super(`Hit a conflict during rebase.`);
     this.name = 'RebaseConflict';
   }
 }
 
-export class PreconditionsFailedError extends ExitError {
+export class PreconditionsFailedError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'PreconditionsFailed';
   }
 }
 
-export class ConcurrentExecutionError extends ExitError {
+export class ConcurrentExecutionError extends Error {
   constructor() {
     super(`Cannot run more than one Graphite process at once.`);
     this.name = 'ConcurrentExecutionError';
   }
 }
 
-export class DetachedError extends ExitError {
+export class DetachedError extends Error {
   constructor() {
     super(`Cannot perform this operation without a branch checked out.`);
     this.name = 'DetachedError';
   }
 }
 
-export class NoBranchError extends ExitError {
+export class NoBranchError extends Error {
   constructor(branchName: string) {
     super(`Could not find branch ${chalk.yellow(branchName)}.`);
     this.name = 'NoBranchError';
   }
 }
 
-export class UntrackedBranchError extends ExitError {
+export class UntrackedBranchError extends Error {
   constructor(branchName: string) {
     super(
       [
@@ -80,14 +58,14 @@ export class UntrackedBranchError extends ExitError {
   }
 }
 
-export class BadTrunkOperationError extends ExitError {
+export class BadTrunkOperationError extends Error {
   constructor() {
     super(`Cannot perform this operation on the trunk branch.`);
     this.name = 'BadTrunkOperationError';
   }
 }
 
-export class KilledError extends ExitError {
+export class KilledError extends Error {
   constructor() {
     super(`Killed Graphite early.`);
     this.name = 'Killed';
