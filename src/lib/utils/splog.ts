@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import chalk from 'chalk';
 import { execSync } from 'child_process';
-import { CommandFailedError } from './run_command';
+import { CommandFailedError } from '../git/runner';
 
 export type TSplog = {
   newline: () => void;

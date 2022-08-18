@@ -26,8 +26,8 @@ import {
 } from './errors';
 import { composeGit } from './git/git';
 import { TGlobalArguments } from './global_arguments';
-import { CommandFailedError, CommandKilledError } from './utils/run_command';
 import { tracer } from './utils/tracer';
+import { CommandFailedError, CommandKilledError } from './git/runner';
 
 export async function graphite(
   args: yargs.Arguments & TGlobalArguments,
