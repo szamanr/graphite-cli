@@ -676,14 +676,20 @@ export function composeMetaCache({
           )
           .reverse()[0]
       );
-      git.commit({
-        ...opts,
-        amend: true,
-        noVerify,
-        rollbackOnError: () => {
+      try {
+        git.commit({
+          ...opts,
+          amend: true,
+          noVerify,
+        });
+      } catch (e) {
+        try {
           git.softReset(cachedMeta.branchRevision);
-        },
-      });
+        } catch {
+          // pass
+        }
+        throw e;
+      }
       cache.branches[branchName] = {
         ...cachedMeta,
         branchRevision: git.getShaOrThrow(branchName),

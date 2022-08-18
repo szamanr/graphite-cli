@@ -28,11 +28,19 @@ export async function createBranchAction(
   }
 
   if (context.metaCache.detectStagedChanges()) {
-    context.metaCache.commit({
-      message: opts.message,
-      patch: !opts.all && opts.patch,
-      rollbackOnError: () => context.metaCache.deleteBranch(branchName),
-    });
+    try {
+      context.metaCache.commit({
+        message: opts.message,
+        patch: !opts.all && opts.patch,
+      });
+    } catch (e) {
+      try {
+        context.metaCache.deleteBranch(branchName);
+      } catch {
+        // pass
+      }
+      throw e;
+    }
   } else {
     context.splog.info(`No staged changes; created a branch with no commit.`);
   }

@@ -6,7 +6,6 @@ export type TCommitOpts = {
   noEdit?: boolean;
   edit?: boolean;
   patch?: boolean;
-  rollbackOnError?: () => void;
 };
 export function commit(opts: TCommitOpts & { noVerify: boolean }): void {
   runGitCommand({
@@ -22,9 +21,7 @@ export function commit(opts: TCommitOpts & { noVerify: boolean }): void {
     options: {
       stdio: 'inherit',
     },
-    onError: () => {
-      opts.rollbackOnError?.();
-    },
+    onError: 'throw',
     resource: 'commit',
   });
 }

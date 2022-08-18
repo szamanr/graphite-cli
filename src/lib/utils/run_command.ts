@@ -4,7 +4,7 @@ export type TRunCommandParameters = {
   command: string;
   args: string[];
   options?: Omit<SpawnSyncOptions, 'encoding' | 'maxBuffer'>;
-  onError: (() => void) | 'throw' | 'ignore';
+  onError: 'throw' | 'ignore';
 };
 
 export function runCommand(params: TRunCommandParameters): string {
@@ -39,11 +39,6 @@ export function runCommand(params: TRunCommandParameters): string {
   // command failed but we ignore it
   if (params.onError === 'ignore') {
     return '';
-  }
-
-  // if a lambda is passed, first we run it, then throw
-  if (params.onError !== 'throw') {
-    params.onError();
   }
 
   throw new CommandFailedError({
