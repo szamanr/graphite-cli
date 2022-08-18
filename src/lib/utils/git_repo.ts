@@ -1,10 +1,11 @@
+import { spawnSync } from 'child_process';
 import fs from 'fs-extra';
 import path from 'path';
 import { USER_CONFIG_OVERRIDE_ENV } from '../context';
-import { rebaseInProgress } from '../git/rebase_in_progress';
-import { runCommand } from './run_command';
 
 const TEXT_FILE_NAME = 'test.txt';
+
+// This class should only be used by tests and `gt demo`
 export class GitRepo {
   dir: string;
   userConfigPath: string;
@@ -17,29 +18,27 @@ export class GitRepo {
     if (opts?.existingRepo) {
       return;
     }
-    if (opts?.repoUrl) {
-      runCommand({
-        command: 'git',
-        args: [`clone`, opts.repoUrl, dir],
-        onError: 'throw',
-      });
-    } else {
-      runCommand({
-        command: 'git',
-        args: [`init`, dir, `-b`, `main`],
-        onError: 'throw',
-      });
-    }
+    spawnSync(
+      'git',
+      opts?.repoUrl ? [`clone`, opts.repoUrl, dir] : [`init`, dir, `-b`, `main`]
+    );
+  }
+
+  runGitCommand(args: string[]): void {
+    spawnSync('git', args, {
+      stdio: process.env.DEBUG ? 'inherit' : 'pipe',
+      cwd: this.dir,
+    });
   }
 
   runCliCommand(command: string[], opts?: { cwd?: string }): void {
-    runCommand({
-      command: process.argv[0],
-      args: [
+    const result = spawnSync(
+      process.argv[0],
+      [
         path.join(__dirname, `..`, `..`, `..`, `..`, `dist`, `src`, `index.js`),
         ...command,
       ],
-      options: {
+      {
         stdio: process.env.DEBUG ? 'inherit' : 'pipe',
         cwd: opts?.cwd || this.dir,
         env: {
@@ -48,41 +47,51 @@ export class GitRepo {
           GRAPHITE_DISABLE_TELEMETRY: '1',
           GRAPHITE_DISABLE_UPGRADE_PROMPT: '1',
         },
-      },
-      onError: 'throw',
-    });
+      }
+    );
+    if (result.status) {
+      throw new Error(JSON.stringify(result));
+    }
   }
 
-  runGitCommand(args: string[], opts?: { cwd?: string }): void {
-    runCommand({
-      command: 'git',
-      args,
-      options: {
-        stdio: process.env.DEBUG ? 'inherit' : 'pipe',
-        cwd: opts?.cwd || this.dir,
-      },
-      onError: 'ignore',
-    });
+  runGitCommandAndGetOutput(args: string[]): string {
+    return (
+      spawnSync('git', args, {
+        encoding: 'utf-8',
+        cwd: this.dir,
+      }).stdout?.trim() ?? ''
+    );
   }
 
   runCliCommandAndGetOutput(args: string[]): string {
-    return runCommand({
-      command: process.argv[0],
-      args: [
-        path.join(__dirname, `..`, `..`, `..`, `..`, `dist`, `src`, `index.js`),
-        ...args,
-      ],
-      options: {
-        cwd: this.dir,
-        env: {
-          ...process.env,
-          [USER_CONFIG_OVERRIDE_ENV]: this.userConfigPath,
-          GRAPHITE_DISABLE_TELEMETRY: '1',
-          GRAPHITE_DISABLE_UPGRADE_PROMPT: '1',
-        },
-      },
-      onError: 'ignore',
-    });
+    return (
+      spawnSync(
+        process.argv[0],
+        [
+          path.join(
+            __dirname,
+            `..`,
+            `..`,
+            `..`,
+            `..`,
+            `dist`,
+            `src`,
+            `index.js`
+          ),
+          ...args,
+        ],
+        {
+          encoding: 'utf-8',
+          cwd: this.dir,
+          env: {
+            ...process.env,
+            [USER_CONFIG_OVERRIDE_ENV]: this.userConfigPath,
+            GRAPHITE_DISABLE_TELEMETRY: '1',
+            GRAPHITE_DISABLE_UPGRADE_PROMPT: '1',
+          },
+        }
+      ).stdout?.trim() ?? ''
+    );
   }
 
   createChange(textValue: string, prefix?: string, unstaged?: boolean): void {
@@ -92,158 +101,68 @@ export class GitRepo {
     );
     fs.writeFileSync(filePath, textValue);
     if (!unstaged) {
-      runCommand({
-        command: 'git',
-        args: [`add`, filePath],
-        options: { cwd: this.dir },
-        onError: 'throw',
-      });
+      this.runGitCommand([`add`, filePath]);
     }
   }
 
   createChangeAndCommit(textValue: string, prefix?: string): void {
     this.createChange(textValue, prefix);
-    runCommand({
-      command: 'git',
-      args: [`add`, `.`],
-      options: { cwd: this.dir },
-      onError: 'throw',
-    });
-    runCommand({
-      command: 'git',
-      args: [`commit`, `-m`, textValue],
-      options: { cwd: this.dir },
-      onError: 'throw',
-    });
+    this.runGitCommand([`add`, `.`]);
+    this.runGitCommand([`commit`, `-m`, textValue]);
   }
 
   createChangeAndAmend(textValue: string, prefix?: string): void {
     this.createChange(textValue, prefix);
-    runCommand({
-      command: 'git',
-      args: [`add`, `.`],
-      options: { cwd: this.dir },
-      onError: 'throw',
-    });
-    runCommand({
-      command: 'git',
-      args: [`commit`, `--amend`, `--no-edit`],
-      options: { cwd: this.dir },
-      onError: 'throw',
-    });
+    this.runGitCommand([`add`, `.`]);
+    this.runGitCommand([`commit`, `--amend`, `--no-edit`]);
   }
 
   deleteBranch(name: string): void {
-    runCommand({
-      command: 'git',
-      args: [`branch`, `-D`, name],
-      options: { cwd: this.dir },
-      onError: 'throw',
-    });
+    this.runGitCommand([`branch`, `-D`, name]);
   }
 
   createPrecommitHook(contents: string): void {
     fs.mkdirpSync(`${this.dir}/.git/hooks`);
     fs.writeFileSync(`${this.dir}/.git/hooks/pre-commit`, contents);
-    runCommand({
-      command: `chmod`,
-      args: [`+x`, `${this.dir}/.git/hooks/pre-commit`],
-      options: { cwd: this.dir },
-      onError: 'throw',
-    });
+    spawnSync('chmod', [`+x`, `${this.dir}/.git/hooks/pre-commit`]);
   }
 
   createAndCheckoutBranch(name: string): void {
-    runCommand({
-      command: 'git',
-      args: [`checkout`, `-b`, name],
-      options: {
-        stdio: process.env.DEBUG ? 'inherit' : 'pipe',
-        cwd: this.dir,
-      },
-      onError: 'throw',
-    });
+    this.runGitCommand([`checkout`, `-b`, name]);
   }
 
   checkoutBranch(name: string): void {
-    runCommand({
-      command: 'git',
-      args: [`checkout`, name],
-      options: {
-        stdio: process.env.DEBUG ? 'inherit' : 'pipe',
-        cwd: this.dir,
-      },
-      onError: 'throw',
-    });
+    this.runGitCommand([`checkout`, name]);
   }
 
   rebaseInProgress(): boolean {
-    return rebaseInProgress({ cwd: this.dir });
+    return fs.existsSync(path.join(this.dir, '.git', 'rebase-merge'));
   }
 
   resolveMergeConflicts(): void {
-    runCommand({
-      command: 'git',
-      args: [`checkout`, `--theirs`, `.`],
-      options: {
-        stdio: process.env.DEBUG ? 'inherit' : 'pipe',
-        cwd: this.dir,
-      },
-      onError: 'throw',
-    });
+    this.runGitCommand([`checkout`, `--theirs`, `.`]);
   }
 
   markMergeConflictsAsResolved(): void {
-    runCommand({
-      command: 'git',
-      args: [`add`, `.`],
-      options: {
-        stdio: process.env.DEBUG ? 'inherit' : 'pipe',
-        cwd: this.dir,
-      },
-      onError: 'throw',
-    });
+    this.runGitCommand([`add`, `.`]);
   }
 
   currentBranchName(): string {
-    return runCommand({
-      command: 'git',
-      args: [`branch`, `--show-current`],
-      options: { cwd: this.dir },
-      onError: 'ignore',
-    });
+    return this.runGitCommandAndGetOutput([`branch`, `--show-current`]);
   }
 
   getRef(refName: string): string {
-    return runCommand({
-      command: 'git',
-      args: [`show-ref`, `-s`, refName],
-      options: { cwd: this.dir },
-      onError: 'ignore',
-    });
+    return this.runGitCommandAndGetOutput([`show-ref`, `-s`, refName]);
   }
 
   listCurrentBranchCommitMessages(): string[] {
-    return runCommand({
-      command: 'git',
-      args: [`log`, `--oneline`, `--format=%B`],
-      options: { cwd: this.dir },
-      onError: 'ignore',
-    })
+    return this.runGitCommandAndGetOutput([`log`, `--oneline`, `--format=%B`])
       .split('\n')
       .filter((l) => l.length > 0);
   }
 
   mergeBranch(args: { branch: string; mergeIn: string }): void {
     this.checkoutBranch(args.branch);
-    runCommand({
-      command: 'git',
-      args: [`merge`, args.mergeIn],
-      options: {
-        cwd: this.dir,
-        stdio: process.env.DEBUG ? 'inherit' : 'pipe',
-      },
-      onError: 'throw',
-    });
+    this.runGitCommand([`merge`, args.mergeIn]);
   }
 }
