@@ -72,7 +72,10 @@ function testBranch(
 ) {
   context.metaCache.checkoutBranch(opts.branchName);
 
-  const outputPath = path.join(opts.tmpDirName, opts.branchName);
+  const outputPath = path.join(
+    opts.tmpDirName,
+    opts.branchName.replace(path.sep, '-')
+  );
 
   // Mark the branch as running.
   opts.state[opts.branchName].status = '[running]';
