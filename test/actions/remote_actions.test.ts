@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { syncAction } from '../../src/actions/sync/sync';
-import { pushBranch } from '../../src/lib/git/push_branch';
+import { composeGit } from '../../src/lib/git/git';
 import { CloneScene } from '../lib/scenes/clone_scene';
 import { configureTest } from '../lib/utils/configure_test';
 
@@ -14,7 +14,7 @@ for (const scene of [new CloneScene()]) {
       scene.repo.runCliCommand([`branch`, `create`, `1`, `-am`, `1`]);
       expect(scene.repo.currentBranchName()).to.equal('1');
 
-      pushBranch({
+      composeGit().pushBranch({
         remote: 'origin',
         branchName: '1',
         noVerify: false,
@@ -38,7 +38,7 @@ for (const scene of [new CloneScene()]) {
       );
 
       expect(() =>
-        pushBranch({
+        composeGit().pushBranch({
           remote: 'origin',
           branchName: '1',
           noVerify: false,

@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import { unstagedChanges } from '../../../src/lib/git/git_status_utils';
 import { allScenes } from '../../lib/scenes/all_scenes';
 import { configureTest } from '../../lib/utils/configure_test';
 import { expectCommits } from '../../lib/utils/expect_commits';
@@ -36,7 +35,6 @@ for (const scene of allScenes) {
 
     it('Can create a branch with add all option', () => {
       scene.repo.createChange('23', 'test', true);
-      expect(unstagedChanges()).to.be.true;
       scene.repo.runCliCommand([
         `branch`,
         `create`,
@@ -45,7 +43,6 @@ for (const scene of allScenes) {
         `add all`,
         `-a`,
       ]);
-      expect(unstagedChanges()).to.be.false;
     });
 
     it('Can restack its parents children', () => {
