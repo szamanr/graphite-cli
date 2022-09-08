@@ -39,6 +39,7 @@ function runGitCommandInternal(params: TRunGitCommandParameters): string {
     encoding: 'utf-8',
     // 1MB should be enough to never have to worry about this
     maxBuffer: 1024 * 1024 * 1024,
+    windowsHide: true,
   });
 
   // this is a syscall failure, not a command failure
