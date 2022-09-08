@@ -113,9 +113,9 @@ function validateBaseRevisions(branchNames: string[], context: TContext): void {
         throw new ExitFailedError(
           [
             `You are trying to submit at least one branch that has not been restacked on its parent.`,
-            `Please restack upstack from ${chalk.yellow(
+            `To resolve this, check out ${chalk.yellow(
               branchName
-            )} and try again.`,
+            )} and run ${chalk.cyan(`gt upstack restack`)}.`,
           ].join('\n')
         );
       }
@@ -124,9 +124,11 @@ function validateBaseRevisions(branchNames: string[], context: TContext): void {
         throw new ExitFailedError(
           [
             `You are trying to submit at least one branch whose base does not match its parent remotely, without including its parent.`,
-            `Please include downstack from ${chalk.yellow(
+            `You may want to use ${chalk.cyan(
+              `gt stack submit`
+            )} to ensure that the ancestors of ${chalk.yellow(
               branchName
-            )} in your submit scope and try again.`,
+            )} are included in your submission.`,
           ].join('\n')
         );
       }
