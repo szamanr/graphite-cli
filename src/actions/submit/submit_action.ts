@@ -13,7 +13,7 @@ import { validateBranchesToSubmit } from './validate_branches';
 export async function submitAction(
   args: {
     scope: TScopeSpec;
-    editPRFieldsInline: boolean;
+    editPRFieldsInline: boolean | undefined;
     draft: boolean;
     publish: boolean;
     dryRun: boolean;

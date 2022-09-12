@@ -21,7 +21,10 @@ for (const scene of [new BasicScene()]) {
       scene.repo.runCliCommand([`branch`, `create`, `a`, `-m`, message]);
 
       expect(
-        await getPRTitle({ branchName: 'a' }, scene.getContext())
+        await getPRTitle(
+          { branchName: 'a', editPRFieldsInline: false },
+          scene.getContext()
+        )
       ).to.equals(title);
       expect(
         inferPRBody(
@@ -35,7 +38,10 @@ for (const scene of [new BasicScene()]) {
         .userConfig.update((data) => (data.submitIncludeCommitMessages = true));
 
       expect(
-        await getPRTitle({ branchName: 'a' }, scene.getContext())
+        await getPRTitle(
+          { branchName: 'a', editPRFieldsInline: false },
+          scene.getContext()
+        )
       ).to.equals(title);
       expect(
         inferPRBody(
@@ -53,7 +59,10 @@ for (const scene of [new BasicScene()]) {
       scene.repo.runCliCommand([`branch`, `create`, `a`, `-m`, commitMessage]);
 
       expect(
-        await getPRTitle({ branchName: 'a' }, scene.getContext())
+        await getPRTitle(
+          { branchName: 'a', editPRFieldsInline: false },
+          scene.getContext()
+        )
       ).to.equals(title);
       expect(
         inferPRBody(
@@ -72,7 +81,10 @@ for (const scene of [new BasicScene()]) {
       scene.repo.createChangeAndCommit(secondSubj);
 
       expect(
-        await getPRTitle({ branchName: 'a' }, scene.getContext())
+        await getPRTitle(
+          { branchName: 'a', editPRFieldsInline: false },
+          scene.getContext()
+        )
       ).to.equals(title);
       expect(
         inferPRBody({ branchName: 'a' }, scene.getContext()).inferredBody
@@ -83,7 +95,10 @@ for (const scene of [new BasicScene()]) {
         .userConfig.update((data) => (data.submitIncludeCommitMessages = true));
 
       expect(
-        await getPRTitle({ branchName: 'a' }, scene.getContext())
+        await getPRTitle(
+          { branchName: 'a', editPRFieldsInline: false },
+          scene.getContext()
+        )
       ).to.equals(title);
       expect(
         inferPRBody({ branchName: 'a' }, scene.getContext()).inferredBody

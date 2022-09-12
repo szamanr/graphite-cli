@@ -40,7 +40,6 @@ export const args = {
     describe:
       'Edit PR fields inline. If --no-interactive is true, this is automatically set to false.',
     type: 'boolean',
-    default: true,
     alias: 'e',
   },
   'no-edit': {

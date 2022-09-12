@@ -8,7 +8,7 @@ import { getPRTemplate } from '../../lib/utils/pr_templates';
 export async function getPRBody(
   args: {
     branchName: string;
-    editPRFieldsInline: boolean;
+    editPRFieldsInline: boolean | undefined;
   },
   context: TContext
 ): Promise<string> {
@@ -18,7 +18,7 @@ export async function getPRBody(
     context
   );
 
-  if (!args.editPRFieldsInline) {
+  if (args.editPRFieldsInline === false) {
     return priorSubmitBody ?? inferredBody;
   }
 
@@ -42,34 +42,36 @@ export async function getPRBody(
 
   const body = usePriorSubmitBody ? priorSubmitBody : inferredBody;
 
-  const response = await prompts(
-    {
-      type: 'select',
-      name: 'body',
-      message: 'Body',
-      choices: [
-        {
-          title: `Edit Body (using ${context.userConfig.getEditor()})`,
-          value: 'edit',
-        },
-        {
-          title: `Skip (${
-            usePriorSubmitBody
-              ? `use body from aborted submit`
-              : skipDescription
-          })`,
-          value: 'skip',
-        },
-      ],
-    },
-    {
-      onCancel: () => {
-        throw new KilledError();
+  if (args.editPRFieldsInline === undefined) {
+    const response = await prompts(
+      {
+        type: 'select',
+        name: 'body',
+        message: 'Body',
+        choices: [
+          {
+            title: `Edit Body (using ${context.userConfig.getEditor()})`,
+            value: 'edit',
+          },
+          {
+            title: `Skip (${
+              usePriorSubmitBody
+                ? `use body from aborted submit`
+                : skipDescription
+            })`,
+            value: 'skip',
+          },
+        ],
       },
+      {
+        onCancel: () => {
+          throw new KilledError();
+        },
+      }
+    );
+    if (response.body === 'skip') {
+      return body;
     }
-  );
-  if (response.body === 'skip') {
-    return body;
   }
 
   return await editPRBody(body, context);
