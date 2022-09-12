@@ -15,7 +15,7 @@ export async function getPRTitle(
     context.metaCache.getPrInfo(args.branchName)?.title ??
     context.metaCache.getAllCommits(args.branchName, 'SUBJECT').reverse()[0];
 
-  if (!args.editPRFieldsInline) {
+  if (args.editPRFieldsInline === false) {
     return title;
   }
 

@@ -30,7 +30,7 @@ type TPRSubmissionAction = { branchName: string } & (
 export async function getPRInfoForBranches(
   args: {
     branchNames: string[];
-    editPRFieldsInline: boolean;
+    editPRFieldsInline: boolean | undefined;
     draft: boolean;
     publish: boolean;
     updateOnly: boolean;
@@ -174,7 +174,7 @@ async function selectBranch(branchName: string): Promise<boolean> {
 async function getPRCreationInfo(
   args: {
     branchName: string;
-    editPRFieldsInline: boolean;
+    editPRFieldsInline: boolean | undefined;
     draft: boolean;
     publish: boolean;
     reviewers: boolean;
