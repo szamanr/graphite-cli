@@ -47,17 +47,6 @@ export function logAction(
     .join('\n');
 
   context.splog.page(logOutput);
-
-  if (
-    opts.style === 'SHORT' &&
-    context.metaCache.isTrunk(opts.branchName) &&
-    !opts.reverse &&
-    !opts.steps
-  ) {
-    context.splog.tip(
-      'Miss the old version of log short? Try the `--classic` flag!'
-    );
-  }
 }
 
 export function logForConflictStatus(
