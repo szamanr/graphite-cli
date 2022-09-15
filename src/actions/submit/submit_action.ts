@@ -3,6 +3,7 @@ import prompts from 'prompts';
 import { TContext } from '../../lib/context';
 import { TScopeSpec } from '../../lib/engine/scope_spec';
 import { ExitFailedError, KilledError } from '../../lib/errors';
+import { CommandFailedError } from '../../lib/git/runner';
 import { cliAuthPrecondition } from '../../lib/preconditions';
 import { getSurvey, showSurvey } from '../survey';
 import { getPRInfoForBranches } from './prepare_branches';
@@ -105,13 +106,20 @@ export async function submitAction(
     try {
       context.metaCache.pushBranch(submissionInfo.head, args.forcePush);
     } catch (err) {
-      context.splog.tip(
-        [
-          `This push may have failed due to external changes to the remote branch.`,
-          'If you are collaborating on this stack, try `gt downstack sync` to pull in changes.',
-          'Alternatively, use the `--force` option of this command to bypass the stale info warning.',
-        ].join('\n')
-      );
+      if (
+        err instanceof CommandFailedError &&
+        err.message.includes('stale info')
+      ) {
+        throw new ExitFailedError(
+          [
+            `Force-with-lease push of ${chalk.yellow(
+              submissionInfo.head
+            )} failed due to external changes to the remote branch.`,
+            'If you are collaborating on this stack, try `gt downstack sync` to pull in changes.',
+            'Alternatively, use the `--force` option of this command to bypass the stale info warning.',
+          ].join('\n')
+        );
+      }
       throw err;
     }
 
