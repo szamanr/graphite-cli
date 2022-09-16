@@ -66,6 +66,6 @@ for (const scene of [new CloneScene()]) {
       );
     });
 
-    // TODO test downstack sync actions
+    // TODO test downstack get actions
   });
 }
