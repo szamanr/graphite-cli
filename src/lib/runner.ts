@@ -165,10 +165,6 @@ function handleGraphiteError(err: any, context: TContextLite): void {
       return;
 
     case UntrackedBranchError:
-      context.splog.tip('You can track a branch with `gt branch track`.');
-      context.splog.error(err.message);
-      return;
-
     case BadTrunkOperationError:
     case ExitFailedError:
     case ConcurrentExecutionError:
