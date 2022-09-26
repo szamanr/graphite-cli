@@ -58,9 +58,13 @@ export async function submitAction(
     context.splog.newline();
   }
 
-  const branchNames = context.metaCache
+  const allBranchNames = context.metaCache
     .getRelativeStack(context.metaCache.currentBranchPrecondition, args.scope)
     .filter((branchName) => !context.metaCache.isTrunk(branchName));
+
+  const branchNames = args.select
+    ? await selectBranches(allBranchNames)
+    : allBranchNames;
 
   context.splog.info(
     chalk.blueBright(
@@ -137,6 +141,27 @@ export async function submitAction(
   if (survey) {
     await showSurvey(survey, context);
   }
+}
+
+async function selectBranches(branchNames: string[]): Promise<string[]> {
+  const result = [];
+  for (const branchName of branchNames) {
+    const selected = (
+      await prompts({
+        name: 'value',
+        initial: true,
+        type: 'confirm',
+        message: `Would you like to submit ${chalk.cyan(branchName)}?`,
+      })
+    ).value;
+    // Clear the prompt result
+    process.stdout.moveCursor(0, -1);
+    process.stdout.clearLine(1);
+    if (selected) {
+      result.push(branchName);
+    }
+  }
+  return result;
 }
 
 async function shouldAbort(

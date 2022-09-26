@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import prompts from 'prompts';
 import { TContext } from '../../lib/context';
 import { TBranchPRInfo } from '../../lib/engine/metadata_ref';
 import { getPRBody } from './pr_body';
@@ -113,7 +112,7 @@ async function getPRAction(
   const prInfo = context.metaCache.getPrInfo(args.branchName);
   const prNumber = prInfo?.number;
 
-  const calculatedStatus =
+  const status =
     prNumber === undefined
       ? args.updateOnly
         ? 'NOOP'
@@ -126,13 +125,6 @@ async function getPRAction(
       ? 'DRAFT'
       : args.publish === true && prInfo.isDraft !== false
       ? 'PUBLISH'
-      : 'NOOP';
-
-  const status =
-    !args.select ||
-    calculatedStatus === 'NOOP' ||
-    (await selectBranch(args.branchName))
-      ? calculatedStatus
       : 'NOOP';
 
   context.splog.info(
@@ -154,21 +146,6 @@ async function getPRAction(
           ? { update: false }
           : { update: true, prNumber }),
       };
-}
-
-async function selectBranch(branchName: string): Promise<boolean> {
-  const result = (
-    await prompts({
-      name: 'value',
-      initial: true,
-      type: 'confirm',
-      message: `Would you like to submit ${chalk.cyan(branchName)}?`,
-    })
-  ).value;
-  // Clear the prompt result
-  process.stdout.moveCursor(0, -1);
-  process.stdout.clearLine(1);
-  return result;
 }
 
 async function getPRCreationInfo(
