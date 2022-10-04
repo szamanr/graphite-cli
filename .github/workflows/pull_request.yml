@@ -32,6 +32,15 @@ jobs:
         run: git --version
       - name: Test
         run: yarn test-ci
+      - name: Upload coverage
+        uses: withgraphite/upload-code-coverage-action@main
+        continue-on-error: true
+        with:
+          repo: graphite-cli
+          org: withgraphite
+          sha: ${{ github.sha }}
+          github-token: ${{ secrets.github_token }}
+          path-to-lcov: "./coverage/lcov.info"
       - name: Coveralls Parallel
         uses: coverallsapp/github-action@master
         with:
