@@ -6,7 +6,7 @@ const args = {
   token: {
     type: 'string',
     alias: 't',
-    describe: 'Auth token. Get it from: https://app.graphite.dev/activate.',
+    describe: 'Auth token. Get it from: https://app.graphite.dev/activate',
     demandOption: false,
   },
 } as const;
