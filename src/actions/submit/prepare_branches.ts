@@ -39,7 +39,7 @@ export async function getPRInfoForBranches(
   },
   context: TContext
 ): Promise<TPRSubmissionInfo> {
-  const prActions = [];
+  const submissionInfo = [];
   for await (const branchName of args.branchNames) {
     const action = await getPRAction(
       {
@@ -52,13 +52,10 @@ export async function getPRInfoForBranches(
       },
       context
     );
-    if (action) {
-      prActions.push(action);
+    if (!action) {
+      continue;
     }
-  }
 
-  const submissionInfo = [];
-  for await (const action of prActions) {
     const parentBranchName = context.metaCache.getParentPrecondition(
       action.branchName
     );
