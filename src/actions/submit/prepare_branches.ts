@@ -69,6 +69,9 @@ export async function getPRInfoForBranches(
             action: 'update' as const,
             prNumber: action.prNumber,
             draft: args.draft ? true : args.publish ? false : undefined,
+            reviewers: await getReviewers({
+              fetchReviewers: args.reviewers,
+            }),
           }
         : {
             action: 'create' as const,
