@@ -82,12 +82,16 @@ export class CommandFailedError extends Error {
     command: string;
     args: string[];
     status: number;
+    errno?: number;
+    code?: string;
     stdout: string;
     stderr: string;
   }) {
     super(
       [
-        `Command failed with exit code ${failure.status}:`,
+        failure.errno && failure.code
+          ? `Command failed with error ${failure.code} (${failure.errno}), exit code ${failure.status}:`
+          : `Command failed with error exit code ${failure.status}:`,
         [failure.command].concat(failure.args).join(' '),
         failure.stdout,
         failure.stderr,
