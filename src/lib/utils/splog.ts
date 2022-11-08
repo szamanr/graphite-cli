@@ -62,20 +62,22 @@ export function composeSplog(
           env: { LESS: 'FRX', LV: '-c', ...process.env },
         });
       } catch (e) {
-        console.log(s);
-        console.log(
-          chalk.yellow(
-            `NOTE: Tried to send output to your pager (${chalk.cyan(
-              opts.pager
-            )}) but encountered an error.\nYou can change your configured pager or disable paging: ${chalk.cyan(
-              `gt user pager --help`
-            )}`
-          )
-        );
-        throw new CommandFailedError({
-          command: opts.pager,
-          ...e,
-        });
+        if (e.status !== 0 || e.code !== 'EPIPE') {
+          console.log(s);
+          console.log(
+            chalk.yellow(
+              `NOTE: Tried to send output to your pager (${chalk.cyan(
+                opts.pager
+              )}) but encountered an error.\nYou can change your configured pager or disable paging: ${chalk.cyan(
+                `gt user pager --help`
+              )}`
+            )
+          );
+          throw new CommandFailedError({
+            command: opts.pager,
+            ...e,
+          });
+        }
       }
     },
   };
