@@ -34,7 +34,7 @@ export async function getPRInfoForBranches(
     publish: boolean;
     updateOnly: boolean;
     dryRun: boolean;
-    reviewers: boolean;
+    reviewers: string | undefined;
     select: boolean;
   },
   context: TContext
@@ -69,9 +69,7 @@ export async function getPRInfoForBranches(
             action: 'update' as const,
             prNumber: action.prNumber,
             draft: args.draft ? true : args.publish ? false : undefined,
-            reviewers: await getReviewers({
-              fetchReviewers: args.reviewers,
-            }),
+            reviewers: await getReviewers(args.reviewers),
           }
         : {
             action: 'create' as const,
@@ -154,7 +152,7 @@ async function getPRCreationInfo(
     editPRFieldsInline: boolean | undefined;
     draft: boolean;
     publish: boolean;
-    reviewers: boolean;
+    reviewers: string | undefined;
   },
   context: TContext
 ): Promise<{
@@ -197,9 +195,7 @@ async function getPRCreationInfo(
     context.metaCache.upsertPrInfo(args.branchName, submitInfo);
   }
 
-  const reviewers = await getReviewers({
-    fetchReviewers: args.reviewers,
-  });
+  const reviewers = await getReviewers(args.reviewers);
 
   const createAsDraft = args.publish
     ? false

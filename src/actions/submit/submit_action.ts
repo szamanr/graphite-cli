@@ -19,7 +19,7 @@ export async function submitAction(
     publish: boolean;
     dryRun: boolean;
     updateOnly: boolean;
-    reviewers: boolean;
+    reviewers: string | undefined;
     confirm: boolean;
     forcePush: boolean;
     select: boolean;
@@ -46,7 +46,7 @@ export async function submitAction(
 
   if (!context.interactive) {
     args.editPRFieldsInline = false;
-    args.reviewers = false;
+    args.reviewers = undefined;
 
     context.splog.info(
       `Running in non-interactive mode. Inline prompts to fill PR fields will be skipped${

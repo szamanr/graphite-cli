@@ -50,9 +50,9 @@ export const args = {
     alias: 'n',
   },
   reviewers: {
-    describe: 'Prompt to manually set reviewers if true',
-    type: 'boolean',
-    default: false,
+    describe:
+      'If set without an argument, prompt to manually set reviewers. Alternatively, accepts a comma separated string of reviewers',
+    type: 'string',
     alias: 'r',
   },
   'dry-run': {
