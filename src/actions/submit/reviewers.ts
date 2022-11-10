@@ -25,5 +25,5 @@ export async function getReviewers(
     return response.reviewers;
   }
 
-  return reviewers.split(',');
+  return reviewers.split(',').map((reviewer) => reviewer.trim());
 }
