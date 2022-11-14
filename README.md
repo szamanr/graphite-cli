@@ -52,7 +52,7 @@ yarn cli <command> # (to run `gt <command>`)
 
 Linking `gt` to a locally built version (includes a build)
 ```
-yarn develop
+yarn dev
 # then to run commands:
 gt <command>
 ```
