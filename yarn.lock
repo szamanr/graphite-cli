@@ -675,13 +675,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@withgraphite/graphite-cli-routes@npm:^0.22.0":
-  version: 0.22.0
-  resolution: "@withgraphite/graphite-cli-routes@npm:0.22.0"
+"@withgraphite/graphite-cli-routes@npm:^0.23.0":
+  version: 0.23.0
+  resolution: "@withgraphite/graphite-cli-routes@npm:0.23.0"
   dependencies:
-    "@withgraphite/retype": ^0.3.11
-    "@withgraphite/retyped-routes": ^0.3.1
-  checksum: 32ed42829ad0b72a40ad73b6a01ef57b9931c242be90238e5d58a6211d21e025fa75938e76aec574dc59dea5c43f8646e3d35964a219f97c48fa543d7bbcb071
+    "@withgraphite/retype": ^0.3.15
+    "@withgraphite/retyped-routes": ^0.3.6
+  checksum: 49ba8642e65f606c21f846ae7d30b3fd290fbb49b6abbe2faebde74a0e746c7a75944493a27f0f12293944b35d66703edd1f7ec75e073964561bc1e7c73fb563
   languageName: node
   linkType: hard
 
@@ -700,7 +700,7 @@ __metadata:
     "@types/yargs": ^17.0.10
     "@typescript-eslint/eslint-plugin": ^5.27.1
     "@typescript-eslint/parser": ^5.27.1
-    "@withgraphite/graphite-cli-routes": ^0.22.0
+    "@withgraphite/graphite-cli-routes": ^0.23.0
     "@withgraphite/retype": ^0.3.11
     "@withgraphite/retyped-routes": ^0.3.1
     chai: ^4.3.6
@@ -738,6 +738,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@withgraphite/retype@npm:^0.3.15":
+  version: 0.3.15
+  resolution: "@withgraphite/retype@npm:0.3.15"
+  checksum: 439c0c69c95ed382ae54273c31e653e913e17d4408d04c5dfe509b2d1de4283177bbd738ab1ba907746ddfa7fb1441c7cc2e87a4500d25b005e42a50e4b6ebdd
+  languageName: node
+  linkType: hard
+
 "@withgraphite/retyped-routes@npm:^0.3.1":
   version: 0.3.1
   resolution: "@withgraphite/retyped-routes@npm:0.3.1"
@@ -748,6 +755,17 @@ __metadata:
     isomorphic-fetch: ^3.0.0
     path-to-regexp: ^6.1.0
   checksum: 9ae24ab1f4752718c83d8c568abc919e929586f8fe2810b8be1db1d34c73ef0ec797b6e955b13f4375292ca0e7b4cba5466679612eb7f48b725d357e677e9e62
+  languageName: node
+  linkType: hard
+
+"@withgraphite/retyped-routes@npm:^0.3.6":
+  version: 0.3.7
+  resolution: "@withgraphite/retyped-routes@npm:0.3.7"
+  dependencies:
+    "@withgraphite/retype": ^0.3.15
+    isomorphic-fetch: ^3.0.0
+    path-to-regexp: ^6.1.0
+  checksum: f73844e11ea18f4a70357aff04ff45a97c407a6d01ed51ccb1221009b888ef0a1b5c35f9961df9895894bd04d8875f1b8fdf0f0479b1e702cef326d2955c5c43
   languageName: node
   linkType: hard
 
