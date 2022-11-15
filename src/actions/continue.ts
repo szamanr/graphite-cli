@@ -1,10 +1,6 @@
 import chalk from 'chalk';
 import { TContext } from '../lib/context';
-import {
-  ExitFailedError,
-  PreconditionsFailedError,
-  RebaseConflictError,
-} from '../lib/errors';
+import { PreconditionsFailedError, RebaseConflictError } from '../lib/errors';
 import { clearContinuation, persistContinuation } from './persist_continuation';
 import { printConflictStatus } from './print_conflict_status';
 import { restackBranches } from './restack';
@@ -28,8 +24,12 @@ export async function continueAction(
 
   if (!rebasedBranchBase) {
     clearContinuation(context);
-    context.metaCache.abortRebase();
-    throw new ExitFailedError('Invalid rebase state, aborting.');
+    context.splog.info(
+      `No Graphite operation to continue — passing through to git.`
+    );
+    context.splog.info(`Running: "${chalk.yellow('git rebase --continue')}"`);
+    context.metaCache.continueGitRebase();
+    return;
   }
 
   const cont = context.metaCache.continueRebase(rebasedBranchBase);
