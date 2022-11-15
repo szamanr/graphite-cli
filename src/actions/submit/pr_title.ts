@@ -9,7 +9,7 @@ export async function getPRTitle(
   },
   context: TContext
 ): Promise<string> {
-  // First check if we have a saved title from a failed submit;
+  // First check if we have a saved title;
   // otherwise, use the subject of the oldest commit on the branch.
   const title =
     context.metaCache.getPrInfo(args.branchName)?.title ??

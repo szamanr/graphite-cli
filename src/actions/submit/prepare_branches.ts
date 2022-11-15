@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { TContext } from '../../lib/context';
 import { TBranchPRInfo } from '../../lib/engine/metadata_ref';
-import { getPRBody } from './pr_body';
+import { editPRBody, getPRBody } from './pr_body';
 import { getPRDraftStatus } from './pr_draft';
 import { getPRTitle } from './pr_title';
 import { getReviewers } from './reviewers';
@@ -20,8 +20,8 @@ type TPRSubmissionAction = { branchName: string } & (
  * necessitate a PR update:
  * - the PR base
  * - the PR's code contents
- *
- * Notably, we do not yet allow users to update the PR title, body, etc.
+ * - the PR's title
+ * - the PR's body
  *
  * Therefore, we should only update the PR iff either of these properties
  * differ from our stored data on the previous PR submission.
@@ -39,7 +39,7 @@ export async function getPRInfoForBranches(
   },
   context: TContext
 ): Promise<TPRSubmissionInfo> {
-  const submissionInfo = [];
+  const submissionInfo: TPRSubmissionInfo = [];
   for await (const branchName of args.branchNames) {
     const action = await getPRAction(
       {
@@ -49,6 +49,7 @@ export async function getPRInfoForBranches(
         publish: args.publish,
         dryRun: args.dryRun,
         select: args.select,
+        editPRFieldsInline: args.editPRFieldsInline,
       },
       context
     );
@@ -68,8 +69,16 @@ export async function getPRInfoForBranches(
         ? {
             action: 'update' as const,
             prNumber: action.prNumber,
-            draft: args.draft ? true : args.publish ? false : undefined,
-            reviewers: await getReviewers(args.reviewers),
+            ...(await getPRUpdateInfo(
+              {
+                branchName: action.branchName,
+                editPRFieldsInline: args.editPRFieldsInline,
+                draft: args.draft,
+                publish: args.publish,
+                reviewers: args.reviewers,
+              },
+              context
+            )),
           }
         : {
             action: 'create' as const,
@@ -98,6 +107,7 @@ async function getPRAction(
     publish: boolean;
     dryRun: boolean;
     select: boolean;
+    editPRFieldsInline: boolean | undefined;
   },
   context: TContext
 ): Promise<TPRSubmissionAction | undefined> {
@@ -117,7 +127,8 @@ async function getPRAction(
         : 'CREATE'
       : parentBranchName !== prInfo?.base
       ? 'RESTACK'
-      : !context.metaCache.branchMatchesRemote(args.branchName)
+      : !context.metaCache.branchMatchesRemote(args.branchName) ||
+        args.editPRFieldsInline
       ? 'CHANGE'
       : args.draft === true && prInfo.isDraft !== true
       ? 'DRAFT'
@@ -208,5 +219,66 @@ async function getPRCreationInfo(
     body: submitInfo.body,
     reviewers,
     draft: createAsDraft,
+  };
+}
+
+async function getPRUpdateInfo(
+  args: {
+    branchName: string;
+    editPRFieldsInline: boolean | undefined;
+    draft: boolean;
+    publish: boolean;
+    reviewers: string | undefined;
+  },
+  context: TContext
+): Promise<{
+  title?: string;
+  body?: string;
+  reviewers: string[];
+  draft: boolean | undefined;
+}> {
+  const submitInfo: TBranchPRInfo = {};
+  if (args.editPRFieldsInline) {
+    context.splog.newline();
+    context.splog.info(
+      `Enter updated info for pull request for ${chalk.cyan(
+        args.branchName
+      )} ▸ ${chalk.blueBright(
+        context.metaCache.getParentPrecondition(args.branchName)
+      )}:`
+    );
+
+    try {
+      submitInfo.title = await getPRTitle(
+        {
+          branchName: args.branchName,
+          editPRFieldsInline: args.editPRFieldsInline,
+        },
+        context
+      );
+
+      const prInfo = context.metaCache.getPrInfo(args.branchName);
+      if (prInfo === undefined) {
+        context.splog.warn(
+          'Cannot find existing PR body; starting from scratch'
+        );
+      }
+      const body = prInfo?.body || '';
+      submitInfo.body = await editPRBody(body, context);
+    } finally {
+      // Save locally in case this command fails
+      context.metaCache.upsertPrInfo(args.branchName, submitInfo);
+    }
+  }
+
+  const reviewers = await getReviewers(args.reviewers);
+
+  const draft = args.draft ? true : args.publish ? false : undefined;
+
+  return {
+    title: submitInfo.title,
+    body: submitInfo.body,
+    reviewers,
+    draft,
   };
 }

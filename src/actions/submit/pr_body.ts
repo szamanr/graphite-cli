@@ -77,7 +77,10 @@ export async function getPRBody(
   return await editPRBody(body, context);
 }
 
-async function editPRBody(initial: string, context: TContext): Promise<string> {
+export async function editPRBody(
+  initial: string,
+  context: TContext
+): Promise<string> {
   // We give the file the name EDIT_DESCRIPTION so certain editors treat it like a commit message
   // Because of this, we need to create a new directory for each PR body so as to avoid collision
   const dir = tmp.dirSync();
