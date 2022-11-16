@@ -72,5 +72,17 @@ for (const scene of allScenes) {
       scene.repo.runCliCommand([`commit`, `amend`, `-m`, `a b c`]);
       expectCommits(scene.repo, 'a b c');
     });
+
+    it('Can amend without staged changes', () => {
+      scene.repo.createChange('2');
+      scene.repo.runCliCommand([`branch`, `create`, `a`, `-m`, `a`]);
+      expectCommits(scene.repo, 'a, 1');
+
+      scene.repo.runCliCommand([`commit`, `amend`, `-m`, `b`]);
+      expectCommits(scene.repo, 'b, 1');
+
+      scene.repo.runCliCommand([`commit`, `amend`, `-n`]);
+      expectCommits(scene.repo, 'b, 1');
+    });
   });
 }

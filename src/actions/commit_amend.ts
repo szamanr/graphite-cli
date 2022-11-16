@@ -1,6 +1,5 @@
 import { TContext } from '../lib/context';
 import { SCOPE } from '../lib/engine/scope_spec';
-import { ensureSomeStagedChangesPrecondition } from '../lib/preconditions';
 import { restackBranches } from './restack';
 
 export function commitAmendAction(
@@ -14,10 +13,6 @@ export function commitAmendAction(
 ): void {
   if (opts.addAll) {
     context.metaCache.addAll();
-  }
-
-  if (opts.noEdit) {
-    ensureSomeStagedChangesPrecondition(context);
   }
 
   context.metaCache.commit({
