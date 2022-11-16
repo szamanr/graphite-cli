@@ -29,8 +29,9 @@ export class ConcurrentExecutionError extends Error {
 }
 
 export class DetachedError extends Error {
-  constructor() {
-    super(`Cannot perform this operation without a branch checked out.`);
+  constructor(extraMsg?: string) {
+    const baseMsg = `Cannot perform this operation without a branch checked out.`;
+    super(extraMsg ? [baseMsg, extraMsg].join('\n') : baseMsg);
     this.name = 'DetachedError';
   }
 }

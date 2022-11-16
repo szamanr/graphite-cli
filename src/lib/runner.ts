@@ -2,6 +2,7 @@
 // We the creators want to understand how people are using the tool
 // All metrics logged are listed plain to see, and are non blocking in case the server is unavailable.
 import yargs from 'yargs';
+import chalk from 'chalk';
 import { version } from '../../package.json';
 import { init } from '../actions/init';
 import { refreshPRInfoInBackground } from '../background_tasks/fetch_pr_info';
@@ -18,6 +19,7 @@ import { getCacheLock, TCacheLock } from './engine/cache_lock';
 import {
   BadTrunkOperationError,
   ConcurrentExecutionError,
+  DetachedError,
   ExitFailedError,
   KilledError,
   PreconditionsFailedError,
@@ -142,6 +144,16 @@ async function graphiteHelper(
     }
 
     await handler.run(context);
+  } catch (err) {
+    if (
+      err.constructor === DetachedError &&
+      context.metaCache.rebaseInProgress()
+    ) {
+      throw new DetachedError(
+        `Did you mean to run ${chalk.cyan(`gt continue`)}?`
+      );
+    }
+    throw err;
   } finally {
     try {
       context.metaCache.persist();
