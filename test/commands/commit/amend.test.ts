@@ -84,5 +84,13 @@ for (const scene of allScenes) {
       scene.repo.runCliCommand([`commit`, `amend`, `-n`]);
       expectCommits(scene.repo, 'b, 1');
     });
+
+    it('Cannot amend an empty commit', () => {
+      scene.repo.runCliCommand([`branch`, `create`, `a`, `-m`, `a`]);
+      expect(scene.repo.currentBranchName()).to.equal('a');
+      expect(() =>
+        scene.repo.runCliCommand([`commit`, `amend`, `-m`, `b`])
+      ).to.throw();
+    });
   });
 }
