@@ -72,3 +72,17 @@ export class KilledError extends Error {
     this.name = 'Killed';
   }
 }
+
+export class BlockedDuringRebaseError extends Error {
+  constructor() {
+    super(
+      [
+        `This operation is blocked during a rebase.`,
+        `You may still use git directly, and continue with ${chalk.cyan(
+          'gt continue'
+        )}.`,
+      ].join('\n')
+    );
+    this.name = 'BlockedDuringRebase';
+  }
+}

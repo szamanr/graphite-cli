@@ -1,6 +1,9 @@
 import { TContext } from '../lib/context';
 import { SCOPE } from '../lib/engine/scope_spec';
-import { PreconditionsFailedError } from '../lib/errors';
+import {
+  PreconditionsFailedError,
+  BlockedDuringRebaseError,
+} from '../lib/errors';
 import { restackBranches } from './restack';
 
 export function commitAmendAction(
@@ -16,6 +19,9 @@ export function commitAmendAction(
     context.metaCache.isBranchEmpty(context.metaCache.currentBranchPrecondition)
   ) {
     throw new PreconditionsFailedError('No commits in this branch to amend');
+  }
+  if (context.metaCache.rebaseInProgress()) {
+    throw new BlockedDuringRebaseError();
   }
 
   if (opts.addAll) {

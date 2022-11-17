@@ -1,6 +1,7 @@
 import { TContext } from '../lib/context';
 import { SCOPE } from '../lib/engine/scope_spec';
 import { ensureSomeStagedChangesPrecondition } from '../lib/preconditions';
+import { BlockedDuringRebaseError } from '../lib/errors';
 import { restackBranches } from './restack';
 
 export function commitCreateAction(
@@ -11,6 +12,10 @@ export function commitCreateAction(
   },
   context: TContext
 ): void {
+  if (context.metaCache.rebaseInProgress()) {
+    throw new BlockedDuringRebaseError();
+  }
+
   if (opts.addAll) {
     context.metaCache.addAll();
   }
