@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import { TContext } from '../lib/context';
-import { PreconditionsFailedError, RebaseConflictError } from '../lib/errors';
+import { NoGraphiteContinue, RebaseConflictError } from '../lib/errors';
 import { clearContinuation, persistContinuation } from './persist_continuation';
 import { printConflictStatus } from './print_conflict_status';
 import { restackBranches } from './restack';
@@ -12,7 +12,7 @@ export async function continueAction(
 ): Promise<void> {
   if (!context.metaCache.rebaseInProgress()) {
     clearContinuation(context);
-    throw new PreconditionsFailedError(`No Graphite command to continue.`);
+    throw new NoGraphiteContinue();
   }
 
   if (opts.addAll) {
@@ -24,12 +24,7 @@ export async function continueAction(
 
   if (!rebasedBranchBase) {
     clearContinuation(context);
-    context.splog.info(
-      `No Graphite operation to continue — passing through to git.`
-    );
-    context.splog.info(`Running: "${chalk.yellow('git rebase --continue')}"`);
-    context.metaCache.continueGitRebase();
-    return;
+    throw new NoGraphiteContinue('git rebase --continue');
   }
 
   const cont = context.metaCache.continueRebase(rebasedBranchBase);

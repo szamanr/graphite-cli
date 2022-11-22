@@ -109,7 +109,6 @@ export type TMetaCache = {
         branchName: string;
       }
     | { result: 'REBASE_CONFLICT' };
-  continueGitRebase: () => void;
   abortRebase: () => void;
 
   isMergedIntoTrunk: (branchName: string) => boolean;
@@ -824,9 +823,6 @@ export function composeMetaCache({
       assertBranchIsValidAndNotTrunkAndGetMeta(branchName);
       handleSuccessfulRebase(branchName, parentBranchRevision);
       return { result, branchName };
-    },
-    continueGitRebase: () => {
-      return git.rebaseContinue();
     },
     abortRebase: () => {
       git.rebaseAbort();

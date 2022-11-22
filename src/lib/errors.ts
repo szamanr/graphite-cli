@@ -86,3 +86,15 @@ export class BlockedDuringRebaseError extends Error {
     this.name = 'BlockedDuringRebase';
   }
 }
+
+export class NoGraphiteContinue extends Error {
+  constructor(didYouMean?: string) {
+    const baseMsg = `No Graphite operation to continue.`;
+    super(
+      didYouMean
+        ? [baseMsg, `Did you mean ${chalk.cyan(didYouMean)}?`].join('\n')
+        : baseMsg
+    );
+    this.name = 'NoGraphiteContinue';
+  }
+}
