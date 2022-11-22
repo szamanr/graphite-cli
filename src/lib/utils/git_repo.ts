@@ -165,4 +165,12 @@ export class GitRepo {
     this.checkoutBranch(args.branch);
     this.runGitCommand([`merge`, args.mergeIn]);
   }
+
+  trackBranch(branch: string, parentBranch?: string): void {
+    return this.runCliCommand(
+      ['branch', 'track']
+        .concat(parentBranch ? ['--parent', parentBranch] : [])
+        .concat([branch])
+    );
+  }
 }
