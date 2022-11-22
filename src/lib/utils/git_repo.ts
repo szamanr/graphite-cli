@@ -50,7 +50,15 @@ export class GitRepo {
       }
     );
     if (result.status) {
-      throw new Error(JSON.stringify(result));
+      throw new Error(
+        [
+          `command result: ${JSON.stringify(result)}`,
+          'stdout:',
+          result.stdout.toString(),
+          'stderr:',
+          result.stderr.toString(),
+        ].join('\n')
+      );
     }
   }
 
