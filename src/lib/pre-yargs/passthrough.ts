@@ -56,9 +56,7 @@ export function passthrough(args: string[]): void {
   console.log(
     chalk.grey(
       [
-        `Command: "${chalk.yellow(
-          command
-        )}" is not a Graphite command, but is supported by git. Passing command through to git...`,
+        `Passing command through to git...`,
         `Running: "${chalk.yellow(`git ${args.slice(2).join(' ')}`)}"\n`,
       ].join('\n')
     )
