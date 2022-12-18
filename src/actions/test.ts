@@ -74,7 +74,7 @@ function testBranch(
 
   const outputPath = path.join(
     opts.tmpDirName,
-    opts.branchName.replace(path.sep, '-')
+    opts.branchName.replaceAll(path.sep, '-')
   );
 
   // Mark the branch as running.
