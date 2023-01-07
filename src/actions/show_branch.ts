@@ -60,7 +60,7 @@ export function getBranchInfo(
     } ${
       context.metaCache.isBranchFixed(args.branchName)
         ? ''
-        : chalk.yellow(`(needs restack)`)
+        : chalk.yellow(`(needs gt upstack restack)`)
     }`,
     `${chalk.dim(
       context.metaCache.getAllCommits(args.branchName, 'COMMITTER_DATE')[0] ??

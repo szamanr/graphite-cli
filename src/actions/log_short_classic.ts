@@ -15,7 +15,7 @@ function displayBranchesInternal(
     display: `${'  '.repeat(opts.indent ?? 0)}↱ $ ${opts.branchName}${
       context.metaCache.isBranchFixed(opts.branchName)
         ? ''
-        : chalk.yellowBright(` (needs restack)`)
+        : chalk.yellowBright(` (needs gt upstack restack)`)
     }`,
     branchName: opts.branchName,
   };
