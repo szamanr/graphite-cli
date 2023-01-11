@@ -293,7 +293,7 @@ function getBranchLines(
         args.noStyleBranchName ||
         context.metaCache.isBranchFixed(args.branchName)
           ? ''
-          : ` ${chalk.reset(`(needs gt upstack restack)`)}`
+          : ` ${chalk.reset(`(needs restack)`)}`
       }`,
     ];
   }
