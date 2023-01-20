@@ -24,7 +24,7 @@ import {
 } from './fetch_branch';
 import { findRemoteBranch } from './find_remote_branch';
 import { getUserEmail } from './get_email';
-import { getShaOrThrow, getSha, getRemoteSha } from './get_sha';
+import { getShaOrThrow, getSha, composeGetRemoteSha } from './get_sha';
 import { getGitEditor, getGitPager } from './git_editor';
 import { unstagedChanges, trackedUncommittedChanges } from './git_status_utils';
 import { isMerged } from './is_merged';
@@ -53,6 +53,7 @@ export function composeGit(): TGit {
 
 function composeGitInternal() {
   return {
+    ...composeGetRemoteSha(),
     addAll,
     getCurrentBranchName,
     moveBranch,
@@ -75,7 +76,6 @@ function composeGitInternal() {
     getUserEmail,
     getShaOrThrow,
     getSha,
-    getRemoteSha,
     getGitEditor,
     getGitPager,
     unstagedChanges,

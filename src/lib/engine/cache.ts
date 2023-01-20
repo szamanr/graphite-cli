@@ -114,6 +114,7 @@ export type TMetaCache = {
   isMergedIntoTrunk: (branchName: string) => boolean;
   isBranchFixed: (branchName: string) => boolean;
   isBranchEmpty: (branchName: string) => boolean;
+  populateRemoteShas: () => Promise<void>;
   branchMatchesRemote: (branchName: string) => boolean;
 
   pushBranch: (branchName: string, forcePush: boolean) => void;
@@ -838,9 +839,12 @@ export function composeMetaCache({
       const cachedMeta = assertBranchIsValidAndNotTrunkAndGetMeta(branchName);
       return git.isDiffEmpty(branchName, cachedMeta.parentBranchRevision);
     },
+    populateRemoteShas: async () => {
+      await git.populateRemoteShas(remote);
+    },
     branchMatchesRemote: (branchName: string) => {
       const cachedMeta = assertBranchIsValidOrTrunkAndGetMeta(branchName);
-      const remoteParentRevision = git.getRemoteSha(branchName, remote);
+      const remoteParentRevision = git.getRemoteSha(branchName);
       return cachedMeta.branchRevision === remoteParentRevision;
     },
     pushBranch: (branchName: string, forcePush: boolean) => {

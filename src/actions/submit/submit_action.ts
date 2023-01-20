@@ -32,7 +32,7 @@ export async function submitAction(
       `Can't use both --publish and --draft flags in one command`
     );
   }
-
+  const populateRemoteShasPromise = context.metaCache.populateRemoteShas();
   const cliAuthToken = cliAuthPrecondition(context);
   if (args.dryRun) {
     context.splog.info(
@@ -79,6 +79,7 @@ export async function submitAction(
       '✏️  Preparing to submit PRs for the following branches...'
     )
   );
+  await populateRemoteShasPromise;
   const submissionInfos = await getPRInfoForBranches(
     {
       branchNames: branchNames,
