@@ -13,6 +13,9 @@ Graphite is currently in closed beta, and you’ll need a Graphite account to su
 
 Everything is still a little early, so please add comments to our user guide if you have any questions, feedback, or suggestions!
 
+## Support
+
+We *do not* consistently check GH issues — if you have any questions or issues, reach out to us on our [Community Slack server](https://join.slack.com/t/graphite-community/shared_invite/zt-1as9rdo7r-pYmEZzt6M1EhTkvJFNhsnQ)!
 
 ## Developing and Running tests
 
