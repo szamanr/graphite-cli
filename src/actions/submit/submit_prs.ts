@@ -113,7 +113,7 @@ async function requestServerToSubmitPRs(
     });
   } else if (response._response.status === UNAUTHORIZED_RESPONSE_CODE) {
     throw new PreconditionsFailedError(
-      'Your Graphite auth token is invalid/expired.\n\nPlease obtain a new auth token by visiting https://app.graphite.dev/activate'
+      `Your Graphite auth token is invalid/expired.\n\nPlease obtain a new auth token by visiting ${context.userConfig.getAppServerUrl()}/activate`
     );
   } else {
     throw new ExitFailedError(
