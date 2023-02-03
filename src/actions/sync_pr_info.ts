@@ -6,7 +6,7 @@ export async function syncPrInfo(
   branchNames: string[],
   context: TContext
 ): Promise<void> {
-  const authToken = context.userConfig.data.authToken;
+  const authToken = context.userConfig.getAuthToken();
   if (authToken === undefined) {
     return;
   }
@@ -22,7 +22,7 @@ export async function syncPrInfo(
         repoName: context.repoConfig.getRepoName(),
         repoOwner: context.repoConfig.getRepoOwner(),
       },
-      context.userConfig.getApiServer()
+      context.userConfig.getApiServerUrl()
     ),
     context.metaCache
   );

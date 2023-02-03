@@ -31,10 +31,10 @@ async function postTelemetry(): Promise<void> {
     // Failed to find traces file, exit
     try {
       await request.requestWithArgs(
-        userConfig.getApiServer(),
+        userConfig.getApiServerUrl(),
         API_ROUTES.traces,
         {
-          auth: userConfigFactory.loadIfExists()?.data.authToken,
+          auth: userConfigFactory.loadIfExists()?.getAuthToken(),
           jsonTraces: fs.readFileSync(tracesPath).toString(),
           cliVersion: version,
         }

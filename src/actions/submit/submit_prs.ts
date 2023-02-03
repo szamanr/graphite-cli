@@ -86,7 +86,7 @@ async function requestServerToSubmitPRs(
   context: TContext
 ): Promise<TSubmittedPR[]> {
   const response = await request.requestWithArgs(
-    context.userConfig.getApiServer(),
+    context.userConfig.getApiServerUrl(),
     API_ROUTES.submitPullRequests,
     {
       authToken: cliAuthToken,

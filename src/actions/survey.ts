@@ -18,7 +18,7 @@ export async function getSurvey(
   try {
     const authToken = cliAuthPrecondition(context);
     const response = await request.requestWithArgs(
-      context.userConfig.getApiServer(),
+      context.userConfig.getApiServerUrl(),
       API_ROUTES.cliSurvey,
       {},
       { authToken: authToken }

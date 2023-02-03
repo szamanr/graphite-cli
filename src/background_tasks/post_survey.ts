@@ -20,14 +20,14 @@ export async function postSurveyResponse(): Promise<void> {
     const surveyConfig = surveyConfigFactory.loadIfExists();
     const surveyResponse = surveyConfig?.data.responses;
     const userConfig = userConfigFactory.load();
-    const authToken = userConfig?.data.authToken;
+    const authToken = userConfig?.getAuthToken();
 
     if (!surveyConfig || !surveyResponse || !authToken) {
       return;
     }
 
     const response = await request.requestWithArgs(
-      userConfig.getApiServer(),
+      userConfig.getApiServerUrl(),
       API_ROUTES.surveyResponse,
       {
         authToken,

@@ -10,7 +10,7 @@ export async function getDownstackDependencies(
   context: TContext
 ): Promise<string[]> {
   const response = await request.requestWithArgs(
-    context.userConfig.getApiServer(),
+    context.userConfig.getApiServerUrl(),
     API_ROUTES.downstackDependencies,
     {},
     {

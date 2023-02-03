@@ -28,7 +28,7 @@ export const handler = async (argv: argsT): Promise<void> => {
       return;
     }
     context.splog.info(
-      context.userConfig.data.authToken ?? 'No auth token set.'
+      context.userConfig.getAuthToken() ?? 'No auth token set.'
     );
   });
 };

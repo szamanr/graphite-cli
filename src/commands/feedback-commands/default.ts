@@ -36,7 +36,7 @@ export const handler = async (argv: argsT): Promise<void> => {
       throw new ExitFailedError(`No message provided`);
     }
     const response = await request.requestWithArgs(
-      context.userConfig.getApiServer(),
+      context.userConfig.getApiServerUrl(),
       API_ROUTES.feedback,
       {
         user: context.userEmail ?? 'NotFound',

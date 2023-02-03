@@ -35,7 +35,7 @@ async function fetchUpgradePrompt(
   try {
     const user = composeGit().getUserEmail();
     const response = await request.requestWithArgs(
-      userConfig.getApiServer(),
+      userConfig.getApiServerUrl(),
       API_ROUTES.upgradePrompt,
       {},
       {

@@ -16,12 +16,28 @@ const schema = t.shape({
   pager: t.optional(t.string),
   restackCommitterDateIsAuthorDate: t.optional(t.boolean),
   submitIncludeCommitMessages: t.optional(t.boolean),
-  graphiteApi: t.optional(t.string),
+  alternativeProfiles: t.optional(
+    t.array(
+      t.shape({
+        name: t.string,
+        hostPrefix: t.string,
+        authToken: t.optional(t.string),
+      })
+    )
+  ),
 });
 
-export type TApiServer = string;
-export const DEFAULT_GRAPHITE_API_SERVER: TApiServer =
+type TProfile = Required<
+  t.TypeOf<typeof schema>
+>['alternativeProfiles'][number];
+
+export type TApiServerUrl = string;
+export type TAppServerUrl = string;
+export const DEFAULT_GRAPHITE_API_SERVER: TApiServerUrl =
   'https://api.graphite.dev/v1';
+
+export const DEFAULT_GRAPHITE_APP_SERVER: TAppServerUrl =
+  'https://app.graphite.dev';
 
 export const userConfigFactory = spiffy({
   schema,
@@ -35,12 +51,50 @@ export const userConfigFactory = spiffy({
     return {};
   },
   helperFunctions: (data) => {
-    const getServerApi = (): TApiServer => {
-      return (
-        process.env.GRAPHITE_API_SERVER ??
-        data.graphiteApi ??
-        DEFAULT_GRAPHITE_API_SERVER
+    // Read the user config and return a host prefix.
+    // If none specified, default to empty string.
+    const getDefaultProfile = (): TProfile => {
+      const alternativeProfiles = data.alternativeProfiles ?? [];
+      if (process.env.GRAPHITE_PROFILE) {
+        const alternativeProfile = alternativeProfiles.find(
+          (p) => p.name === process.env.GRAPHITE_PROFILE
+        );
+        if (alternativeProfile) {
+          return alternativeProfile;
+        } else {
+          throw new Error(`Unknown profile ${process.env.GRAPHITE_PROFILE}`);
+        }
+      }
+      const optionalDefaultProfile = alternativeProfiles.find(
+        (p) => p.name === 'default'
       );
+      if (optionalDefaultProfile) {
+        return optionalDefaultProfile;
+      } else {
+        return {
+          name: 'default',
+          hostPrefix: '',
+          authToken: data.authToken,
+        };
+      }
+    };
+
+    const getApiServerUrl = (): TApiServerUrl => {
+      const hostPrefix = getDefaultProfile().hostPrefix;
+      return hostPrefix
+        ? `https://api.${hostPrefix}.graphite.dev/v1`
+        : DEFAULT_GRAPHITE_API_SERVER;
+    };
+
+    const getAppServerUrl = (): TAppServerUrl => {
+      const hostPrefix = getDefaultProfile().hostPrefix;
+      return hostPrefix
+        ? `https://app.${hostPrefix}.graphite.dev/v1`
+        : DEFAULT_GRAPHITE_APP_SERVER;
+    };
+
+    const getAuthToken = (): string | undefined => {
+      return getDefaultProfile().authToken;
     };
 
     const getEditor = () => {
@@ -72,7 +126,9 @@ export const userConfigFactory = spiffy({
 
     return {
       getEditor,
-      getApiServer: getServerApi,
+      getApiServerUrl,
+      getAppServerUrl,
+      getAuthToken,
       getPager,
       execEditor: (editFilePath: string) => {
         const command = `${getEditor()} ${editFilePath}`;
