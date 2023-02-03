@@ -41,7 +41,8 @@ export async function getAction(
       authToken,
       repoName: context.repoConfig.getRepoName(),
       repoOwner: context.repoConfig.getRepoOwner(),
-    }
+    },
+    context
   );
 
   await getBranchesFromRemote(

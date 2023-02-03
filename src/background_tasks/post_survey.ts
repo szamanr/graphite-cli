@@ -1,6 +1,5 @@
 import { API_ROUTES } from '@withgraphite/graphite-cli-routes';
 import { request } from '@withgraphite/retyped-routes';
-import { API_SERVER } from '../lib/api/server';
 import { TContextLite } from '../lib/context';
 import { surveyConfigFactory } from '../lib/spiffy/survey_responses_spf';
 import { userConfigFactory } from '../lib/spiffy/user_config_spf';
@@ -20,17 +19,18 @@ export async function postSurveyResponse(): Promise<void> {
   try {
     const surveyConfig = surveyConfigFactory.loadIfExists();
     const surveyResponse = surveyConfig?.data.responses;
-    const authToken = userConfigFactory.loadIfExists()?.data.authToken;
+    const userConfig = userConfigFactory.load();
+    const authToken = userConfig?.data.authToken;
 
     if (!surveyConfig || !surveyResponse || !authToken) {
       return;
     }
 
     const response = await request.requestWithArgs(
-      API_SERVER,
+      userConfig.getApiServer(),
       API_ROUTES.surveyResponse,
       {
-        authToken: authToken,
+        authToken,
         responses: {
           timestamp: surveyResponse.timestamp,
           responses: surveyResponse.responses.map((qa) => {

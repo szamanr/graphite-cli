@@ -49,11 +49,15 @@ export async function getPrInfoToUpsert({
     branchName,
     prNumber: readMetadataRef(branchName)?.prInfo?.number,
   }));
-  return await getPrInfoForBranches(branchNamesWithExistingPrNumbers, {
-    authToken,
-    repoName,
-    repoOwner,
-  });
+  return await getPrInfoForBranches(
+    branchNamesWithExistingPrNumbers,
+    {
+      authToken,
+      repoName,
+      repoOwner,
+    },
+    userConfig.getApiServer()
+  );
 }
 
 async function refreshPRInfo(): Promise<void> {

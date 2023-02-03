@@ -1,8 +1,8 @@
 import { API_ROUTES } from '@withgraphite/graphite-cli-routes';
 import t from '@withgraphite/retype';
 import { request } from '@withgraphite/retyped-routes';
+import { TApiServer } from '../spiffy/user_config_spf';
 import { TRepoParams } from './common_params';
-import { API_SERVER } from './server';
 
 type TBranchNameWithPrNumber = {
   branchName: string;
@@ -15,7 +15,8 @@ export type TPRInfoToUpsert = t.UnwrapSchemaMap<
 
 export async function getPrInfoForBranches(
   branchNamesWithExistingPrInfo: TBranchNameWithPrNumber[],
-  params: TRepoParams
+  params: TRepoParams,
+  apiServer: TApiServer
 ): Promise<TPRInfoToUpsert> {
   // We sync branches without existing PR info by name.  For branches
   // that are already associated with a PR, we only sync if both the
@@ -33,7 +34,7 @@ export async function getPrInfoForBranches(
   });
 
   const response = await request.requestWithArgs(
-    API_SERVER,
+    apiServer,
     API_ROUTES.pullRequestInfo,
     {
       ...params,

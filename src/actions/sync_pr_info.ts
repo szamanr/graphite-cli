@@ -21,7 +21,8 @@ export async function syncPrInfo(
         authToken,
         repoName: context.repoConfig.getRepoName(),
         repoOwner: context.repoConfig.getRepoOwner(),
-      }
+      },
+      context.userConfig.getApiServer()
     ),
     context.metaCache
   );

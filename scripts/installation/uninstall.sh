@@ -1,3 +1,3 @@
 #!/bin/bash
 
-npm uninstall -g @withgraphite/graphite-cli
+npm uninstall --location=global @withgraphite/graphite-cli

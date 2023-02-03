@@ -2,7 +2,6 @@ import { API_ROUTES } from '@withgraphite/graphite-cli-routes';
 import * as t from '@withgraphite/retype';
 import { request } from '@withgraphite/retyped-routes';
 import chalk from 'chalk';
-import { API_SERVER } from '../../lib/api/server';
 import { TContext } from '../../lib/context';
 import { ExitFailedError, PreconditionsFailedError } from '../../lib/errors';
 import { cuteString } from '../../lib/utils/cute_string';
@@ -87,7 +86,7 @@ async function requestServerToSubmitPRs(
   context: TContext
 ): Promise<TSubmittedPR[]> {
   const response = await request.requestWithArgs(
-    API_SERVER,
+    context.userConfig.getApiServer(),
     API_ROUTES.submitPullRequests,
     {
       authToken: cliAuthToken,

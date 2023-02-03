@@ -4,7 +4,6 @@ import fs from 'fs-extra';
 import path from 'path';
 import tmp from 'tmp';
 import { version } from '../../package.json';
-import { API_SERVER } from '../lib/api/server';
 import { userConfigFactory } from '../lib/spiffy/user_config_spf';
 import { spawnDetached } from '../lib/utils/spawn';
 import { tracer } from '../lib/utils/tracer';
@@ -23,6 +22,7 @@ export function postTelemetryInBackground(): void {
 }
 
 async function postTelemetry(): Promise<void> {
+  const userConfig = userConfigFactory.load();
   if (process.env.GRAPHITE_DISABLE_TELEMETRY) {
     return;
   }
@@ -30,11 +30,15 @@ async function postTelemetry(): Promise<void> {
   if (tracesPath && fs.existsSync(tracesPath)) {
     // Failed to find traces file, exit
     try {
-      await request.requestWithArgs(API_SERVER, API_ROUTES.traces, {
-        auth: userConfigFactory.loadIfExists()?.data.authToken,
-        jsonTraces: fs.readFileSync(tracesPath).toString(),
-        cliVersion: version,
-      });
+      await request.requestWithArgs(
+        userConfig.getApiServer(),
+        API_ROUTES.traces,
+        {
+          auth: userConfigFactory.loadIfExists()?.data.authToken,
+          jsonTraces: fs.readFileSync(tracesPath).toString(),
+          cliVersion: version,
+        }
+      );
     } catch (err) {
       return;
     }

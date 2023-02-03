@@ -3,7 +3,6 @@ import { default as t } from '@withgraphite/retype';
 import { request } from '@withgraphite/retyped-routes';
 import prompts from 'prompts';
 import { postSurveyResponse } from '../background_tasks/post_survey';
-import { API_SERVER } from '../lib/api/server';
 import { TContext } from '../lib/context';
 import { cliAuthPrecondition } from '../lib/preconditions';
 import { TSurveyResponse } from '../lib/spiffy/survey_responses_spf';
@@ -19,7 +18,7 @@ export async function getSurvey(
   try {
     const authToken = cliAuthPrecondition(context);
     const response = await request.requestWithArgs(
-      API_SERVER,
+      context.userConfig.getApiServer(),
       API_ROUTES.cliSurvey,
       {},
       { authToken: authToken }

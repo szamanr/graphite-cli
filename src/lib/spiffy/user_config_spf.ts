@@ -16,7 +16,12 @@ const schema = t.shape({
   pager: t.optional(t.string),
   restackCommitterDateIsAuthorDate: t.optional(t.boolean),
   submitIncludeCommitMessages: t.optional(t.boolean),
+  graphiteApi: t.optional(t.string),
 });
+
+export type TApiServer = string;
+export const DEFAULT_GRAPHITE_API_SERVER: TApiServer =
+  'https://api.graphite.dev/v1';
 
 export const userConfigFactory = spiffy({
   schema,
@@ -30,6 +35,14 @@ export const userConfigFactory = spiffy({
     return {};
   },
   helperFunctions: (data) => {
+    const getServerApi = (): TApiServer => {
+      return (
+        process.env.GRAPHITE_API_SERVER ??
+        data.graphiteApi ??
+        DEFAULT_GRAPHITE_API_SERVER
+      );
+    };
+
     const getEditor = () => {
       return (
         process.env.GT_EDITOR ?? // single command override
@@ -59,6 +72,7 @@ export const userConfigFactory = spiffy({
 
     return {
       getEditor,
+      getApiServer: getServerApi,
       getPager,
       execEditor: (editFilePath: string) => {
         const command = `${getEditor()} ${editFilePath}`;

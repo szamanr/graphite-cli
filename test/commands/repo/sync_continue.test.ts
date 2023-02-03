@@ -1,7 +1,7 @@
 import { API_ROUTES } from '@withgraphite/graphite-cli-routes';
 import { expect } from 'chai';
 import nock from 'nock';
-import { API_SERVER } from '../../../src/lib/api/server';
+import { DEFAULT_GRAPHITE_API_SERVER } from '../../../src/lib/spiffy/user_config_spf';
 import { allScenes } from '../../lib/scenes/all_scenes';
 import { configureTest } from '../../lib/utils/configure_test';
 import { expectBranches } from '../../lib/utils/expect_branches';
@@ -15,7 +15,7 @@ for (const scene of allScenes) {
     beforeEach(() => {
       // We need to stub out the endpoint that sends back information on
       // the GitHub PRs associated with each branch.
-      nock(API_SERVER).post(API_ROUTES.pullRequestInfo.url).reply(200, {
+      nock(DEFAULT_GRAPHITE_API_SERVER).post(API_ROUTES.pullRequestInfo.url).reply(200, {
         prs: [],
       });
 
