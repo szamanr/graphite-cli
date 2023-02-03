@@ -27,7 +27,7 @@ const schema = t.shape({
   ),
 });
 
-type TProfile = Required<
+export type TProfile = Required<
   t.TypeOf<typeof schema>
 >['alternativeProfiles'][number];
 
@@ -89,7 +89,7 @@ export const userConfigFactory = spiffy({
     const getAppServerUrl = (): TAppServerUrl => {
       const hostPrefix = getDefaultProfile().hostPrefix;
       return hostPrefix
-        ? `https://app.${hostPrefix}.graphite.dev/v1`
+        ? `https://app.${hostPrefix}.graphite.dev`
         : DEFAULT_GRAPHITE_APP_SERVER;
     };
 
