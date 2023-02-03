@@ -24,12 +24,6 @@
   "eslint.validate": ["javascript","typescript"],
   "typescript.preferences.importModuleSpecifier": "project-relative",
   "typescript.preferences.importModuleSpecifierEnding": "minimal",
-  "[sql]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-  },
   "typescript.tsdk": ".yarn/sdks/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
 }
